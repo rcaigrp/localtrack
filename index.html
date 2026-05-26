@@ -1,37 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LocalTrack</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <h1>LocalTrack</h1>
-    <div id="timer-display">00:00:00</div>
-    <div class="controls">
-      <button id="start">Start</button>
-      <button id="pause">Pause</button>
-      <button id="stop">Stop</button>
-    </div>
-    <div class="manual-entry">
+  <div id="app">
+    <header>
+      <h1>LocalTrack</h1>
+    </header>
+    <section id="timer">
+      <div id="elapsed">00:00:00</div>
+      <div id="controls">
+        <button id="start">Start</button>
+        <button id="pause">Pause</button>
+        <button id="stop">Stop</button>
+      </div>
+    </section>
+    <section id="manual-entry">
       <h2>Manual Entry</h2>
-      <input type="text" id="project-name" placeholder="Project Name">
-      <input type="date" id="entry-date">
-      <input type="number" id="duration-hours" placeholder="Hours">
-      <input type="number" id="duration-minutes" placeholder="Minutes">
-      <textarea id="notes" placeholder="Notes"></textarea>
-      <button id="save-entry">Save Entry</button>
-    </div>
-    <div class="entries">
+      <form id="manual-form">
+        <label>Project: <input type="text" id="project-name" required></label>
+        <label>Date: <input type="date" id="entry-date" required></label>
+        <label>Hours: <input type="number" id="hours" min="0" step="0.5" required></label>
+        <label>Minutes: <input type="number" id="minutes" min="0" max="59" required></label>
+        <label>Notes: <textarea id="notes"></textarea></label>
+        <button type="submit">Save Entry</button>
+      </form>
+    </section>
+    <section id="summary">
+      <h2>Today's Summary</h2>
+      <div id="today-total">0h 0m</div>
+    </section>
+    <section id="entries">
       <h2>Recent Entries</h2>
       <ul id="entry-list"></ul>
-    </div>
-    <div class="actions">
+    </section>
+    <footer>
       <button id="export-json">Export JSON</button>
       <button id="export-csv">Export CSV</button>
-      <button id="clear-storage">Clear Storage</button>
-    </div>
+      <button id="clear-storage">Clear Data</button>
+    </footer>
   </div>
   <script src="popup.js"></script>
 </body>
