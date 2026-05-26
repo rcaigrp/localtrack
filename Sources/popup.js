@@ -1,109 +1,118 @@
+const timerDisplay = document.getElementById('timer');
+const startButton = document.getElementById('startBtn');
+const pauseButton = document.getElementById('pauseBtn');
+const resetButton = document.getElementById('resetBtn');
+const manualEntryForm = document.getElementById('manualEntryForm');
+const exportButton = document.getElementById('exportBtn');
+
+let startTime = 0;
+let elapsedTime = 0;
 let timerInterval = null;
-let seconds = 0;
 let isRunning = false;
 
-// DOM elements
-const timeDisplay = document.getElementById('time-display');
-const startBtn = document.getElementById('start-btn');
-const pauseBtn = document.getElementById('pause-btn');
-const stopBtn = document.getElementById('stop-btn');
-const resetBtn = document.getElementById('reset-btn');
+// Timer state management
+const saveTimerState = (state) => {
+  chrome.storage.local.set({timerState: state});
+};
 
-// Update display with formatted time
-function updateDisplay() {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
-  
-  timeDisplay.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-}
-
-// Save timer state to storage
-function saveTimerState() {
-  const timerData = {
-    seconds: seconds,
-    isRunning: isRunning
-  };
-  
-  chrome.storage.local.set({timerData: timerData}, function() {
-    if (chrome.runtime.lastError) {
-      console.error('Storage error:', chrome.runtime.lastError);
-    }
+const loadTimerState = () => {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['timerState'], (result) => {
+      resolve(result.timerState || null);
+    });
   });
-}
+};
 
-// Load timer state from storage
-function loadTimerState() {
-  chrome.storage.local.get(['timerData'], function(result) {
-    if (result.timerData) {
-      seconds = result.timerData.seconds;
-      isRunning = result.timerData.isRunning;
-      updateDisplay();
-      
-      if (isRunning) {
-        startTimer();
-      }
-    }
-  });
-}
+// Format time in HH:MM:SS
+const formatTime = (ms) => {
+  let seconds = Math.floor(ms / 1000);
+  let minutes = Math.floor(seconds / 60);
+  let hours = Math.floor(minutes / 60);
+  
+  seconds = seconds % 60;
+  minutes = minutes % 60;
+  
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+};
 
-// Start the timer
-function startTimer() {
-  if (isRunning) return;
-  
-  isRunning = true;
-  saveTimerState();
-  
-  function tick() {
-    if (!isRunning) return;
-    
-    seconds++;
+// Update timer display
+const updateDisplay = () => {
+  const currentTime = Date.now();
+  const totalElapsed = elapsedTime + (isRunning ? (currentTime - startTime) : 0);
+  timerDisplay.textContent = formatTime(totalElapsed);
+};
+
+// Animation frame based timer update
+const animateTimer = () => {
+  if (isRunning) {
     updateDisplay();
-    saveTimerState(); // Save state on every tick
+    // Save state on every animation frame for smooth persistence
+    saveTimerState({
+      isRunning,
+      elapsedTime,
+      startTime: Date.now() - (elapsedTime % 1000)
+    });
+    requestAnimationFrame(animateTimer);
+  } else {
+    updateDisplay();
+  }
+};
+
+// Start timer
+const startTimer = () => {
+  if (!isRunning) {
+    isRunning = true;
+    startTime = Date.now() - elapsedTime;
+    animateTimer();
+  }
+};
+
+// Pause timer
+const pauseTimer = () => {
+  if (isRunning) {
+    isRunning = false;
+    const currentTime = Date.now();
+    elapsedTime += (currentTime - startTime);
+    saveTimerState({
+      isRunning,
+      elapsedTime,
+      startTime: null
+    });
+  }
+};
+
+// Reset timer
+const resetTimer = () => {
+  isRunning = false;
+  elapsedTime = 0;
+  startTime = 0;
+  saveTimerState({
+    isRunning,
+    elapsedTime,
+    startTime: null
+  });
+  updateDisplay();
+};
+
+// Load saved timer state on popup open
+const initializeTimer = async () => {
+  const savedState = await loadTimerState();
+  if (savedState) {
+    isRunning = savedState.isRunning;
+    elapsedTime = savedState.elapsedTime;
     
-    // Use requestAnimationFrame for better performance
-    timerInterval = requestAnimationFrame(tick);
-  }
-  
-  timerInterval = requestAnimationFrame(tick);
-}
-
-// Pause the timer
-function pauseTimer() {
-  isRunning = false;
-  if (timerInterval) {
-    cancelAnimationFrame(timerInterval);
-  }
-  saveTimerState();
-}
-
-// Stop the timer
-function stopTimer() {
-  isRunning = false;
-  seconds = 0;
-  if (timerInterval) {
-    cancelAnimationFrame(timerInterval);
+    if (isRunning) {
+      startTime = Date.now() - elapsedTime;
+      animateTimer();
+    }
   }
   updateDisplay();
-  saveTimerState();
-}
-
-// Reset the timer
-function resetTimer() {
-  isRunning = false;
-  seconds = 0;
-  if (timerInterval) {
-    cancelAnimationFrame(timerInterval);
-  }
-  updateDisplay();
-  saveTimerState();
-}
+};
 
 // Event listeners
-startBtn.addEventListener('click', startTimer);
-pauseBtn.addEventListener('click', pauseTimer);
-stopBtn.addEventListener('click', stopTimer);
-resetBtn.addEventListener('click', resetTimer);
+startButton.addEventListener('click', startTimer);
+pauseButton.addEventListener('click', pauseTimer);
+resetButton.addEventListener('click', resetTimer);
 
-// Load saved state when popup opens
-loadTimerState();
+// Initialize timer on popup load
+initializeTimer();

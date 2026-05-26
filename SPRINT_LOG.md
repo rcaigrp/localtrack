@@ -480,3 +480,7 @@ I'm implementing the timer persistence logic in popup.js using chrome.storage.lo
 ## Turn 12 — Craft (2026-05-26 18:30 UTC)
 
 I'm implementing timer persistence functionality in popup.js using chrome.storage.local. Based on the project files and previous insights, I'll rewrite the popup.js file to properly save timer state on every tick and restore it when the popup opens, using requestAnimationFrame for better performance.
+
+## Turn 13 — Craft (2026-05-26 18:32 UTC)
+
+I've implemented timer persistence in popup.js using chrome.storage.local with requestAnimationFrame for better performance. The solution saves timer state on every tick and restores it when popup opens, addressing the core persistence issue identified in previous iterations.
