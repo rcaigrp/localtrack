@@ -1,14 +1,15 @@
 # LocalTrack Browser Extension
 
 ## Goal
-Build a privacy-first, local-only Browser Extension for tracking project time.
+Build a privacy-first, local-only Browser Extension for tracking project time. Operates entirely offline with zero cloud dependency.
 
 ## Architecture
-- **UI**: Simple popup layout with timer, manual entry form, and entry list.
-- **Storage**: `chrome.storage.local` for entries and timer state.
-- **Background**: Service worker (`background.js`) for persistent timer state.
-- **Export**: JSON and CSV generation using Blob and URL.createObjectURL.
+- **UI**: Vanilla JS, HTML, CSS in popup
+- **Storage**: `chrome.storage.local` for timer state and entries
+- **Background**: Service worker for persistent timer state
+- **Testing**: `pytest` with structural validation of JS/HTML/JSON files
 
 ## Sprint Status
-- Meeting 2: Initialized project, defined acceptance criteria, and implemented core files.
-- Next: Verify acceptance tests and refine UI/UX.
+- Meeting 1: Architecture design, API research, dependency selection. (Pivoted from iOS to Browser Extension per constraints)
+- Meeting 2: Implemented core files (manifest, HTML, JS, CSS, background) and acceptance tests.
+- Current: Tests passing. Ready for completion.
