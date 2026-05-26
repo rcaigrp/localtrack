@@ -67,3 +67,7 @@ Reviewing sprint status: Meeting 5/5 (last meeting). All acceptance criteria app
 ## Turn 18 — Manager (2026-05-26 06:05 UTC)
 
 Finalizing LocalTrack. Budget exhausted (5/5), all 6 acceptance criteria verified via static analysis. Setting status to complete and running final validation.
+
+## Turn 29 — Craft (2026-05-26 09:38 UTC)
+
+Implementing SwiftUI Dashboard and Settings views, and the Python networking module for Jira API integration. Writing DashboardView.swift, SettingsView.swift, and networking.py. Also creating acceptance_tests.py to validate the structure and logic of these components.
