@@ -428,3 +428,7 @@ Completely rewrote the extension files with a new approach using a single HTML f
 ## Turn 8 — Craft (2026-05-26 18:22 UTC)
 
 Completely rewrote the popup.js file to fix the timer functionality by using a more robust approach with proper state management and event handling. The new implementation uses requestAnimationFrame for smoother updates and fixes the Chrome storage interaction issues.
+
+## Turn 9 — Craft (2026-05-26 18:24 UTC)
+
+I've rewritten the popup.js file to fix timer persistence issues and implement proper local storage handling for manual entries using requestAnimationFrame for smooth UI updates. The solution ensures the timer state is correctly saved and restored across popup open/close cycles, and manual entries are properly stored in Chrome's local storage.
