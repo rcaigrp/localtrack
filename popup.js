@@ -1,186 +1,166 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const timerDisplay = document.getElementById('timer-display');
-  const startBtn = document.getElementById('start-btn');
-  const pauseBtn = document.getElementById('pause-btn');
-  const stopBtn = document.getElementById('stop-btn');
-  const entryForm = document.getElementById('entry-form');
-  const entriesList = document.getElementById('entries-list');
-  const todaySummary = document.getElementById('today-summary');
-  const clearBtn = document.getElementById('clear-btn');
-  const exportJsonBtn = document.getElementById('export-json');
-  const exportCsvBtn = document.getElementById('export-csv');
+// Core logic for timer, manual entry, storage, export
+const state = {
+  running: false,
+  startTime: null,
+  elapsed: 0,
+  intervalId: null
+};
 
-  let timerInterval = null;
-  let timerState = { running: false, startTime: null };
-
-  chrome.storage.local.get(['timer', 'entries'], (data) => {
-    if (data.timer && data.timer.running) {
-      timerState = data.timer;
-      startTimer();
-      updateTimerDisplay();
-      pauseBtn.disabled = false;
-      stopBtn.disabled = false;
-      startBtn.disabled = true;
+// Load state from storage
+chrome.storage.local.get(['timerState', 'entries'], (data) => {
+  if (data.timerState) {
+    state.running = data.timerState.running;
+    state.startTime = data.timerState.startTime;
+    state.elapsed = data.timerState.elapsed;
+    if (state.running) {
+      const now = Date.now();
+      const diff = now - state.startTime;
+      state.elapsed += diff;
+      state.startTime = now;
+      startTimerInterval();
     }
-    renderEntries(data.entries || []);
-  });
-
-  function startTimer() {
-    if (!timerState.startTime) {
-      timerState.startTime = Date.now();
-    }
-    timerInterval = setInterval(updateTimerDisplay, 1000);
   }
+  renderEntries(data.entries || []);
+});
 
-  function updateTimerDisplay() {
-    const elapsed = Date.now() - timerState.startTime;
-    const hours = Math.floor(elapsed / 3600000);
-    const minutes = Math.floor((elapsed % 3600000) / 60000);
-    const seconds = Math.floor((elapsed % 60000) / 1000);
-    timerDisplay.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  }
+function saveState() {
+  chrome.storage.local.set({ timerState: state });
+}
 
-  startBtn.addEventListener('click', () => {
-    timerState = { running: true, startTime: Date.now() };
-    saveTimerState();
-    startTimer();
-    startBtn.disabled = true;
-    pauseBtn.disabled = false;
-    stopBtn.disabled = false;
+function startTimerInterval() {
+  if (state.intervalId) clearInterval(state.intervalId);
+  state.intervalId = setInterval(() => {
+    state.elapsed += 1000;
+    updateTimerDisplay();
+  }, 1000);
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+  const totalMs = state.elapsed;
+  const h = Math.floor(totalMs / 3600000);
+  const m = Math.floor((totalMs % 3600000) / 60000);
+  const s = Math.floor((totalMs % 60000) / 1000);
+  document.getElementById('timer-display').textContent = 
+    `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+document.getElementById('start-btn').addEventListener('click', () => {
+  state.running = true;
+  state.startTime = Date.now();
+  saveState();
+  startTimerInterval();
+});
+
+document.getElementById('pause-btn').addEventListener('click', () => {
+  state.running = false;
+  saveState();
+  if (state.intervalId) clearInterval(state.intervalId);
+});
+
+document.getElementById('stop-btn').addEventListener('click', () => {
+  state.running = false;
+  if (state.intervalId) clearInterval(state.intervalId);
+  const entry = {
+    id: Date.now(),
+    project: 'Timer',
+    date: new Date().toISOString().split('T')[0],
+    startTime: new Date(state.startTime).toISOString(),
+    endTime: new Date().toISOString(),
+    duration: state.elapsed,
+    notes: 'Timer session'
+  };
+  chrome.storage.local.get(['entries'], (data) => {
+    const entries = data.entries || [];
+    entries.push(entry);
+    chrome.storage.local.set({ entries });
+    renderEntries(entries);
   });
+  state.elapsed = 0;
+  state.startTime = null;
+  updateTimerDisplay();
+  saveState();
+});
 
-  pauseBtn.addEventListener('click', () => {
-    clearInterval(timerInterval);
-    timerState.running = false;
-    saveTimerState();
-    pauseBtn.disabled = true;
-    startBtn.disabled = false;
+// Manual Entry
+document.getElementById('manual-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const project = document.getElementById('project-name').value;
+  const date = document.getElementById('entry-date').value;
+  const durationStr = document.getElementById('duration').value;
+  const notes = document.getElementById('notes').value;
+  
+  const [h, m] = durationStr.split(':').map(Number);
+  const durationMs = (h || 0) * 60 * 60 * 1000 + (m || 0) * 60 * 1000;
+  
+  const entry = {
+    id: Date.now(),
+    project,
+    date,
+    startTime: null,
+    endTime: null,
+    duration: durationMs,
+    notes
+  };
+  
+  chrome.storage.local.get(['entries'], (data) => {
+    const entries = data.entries || [];
+    entries.push(entry);
+    chrome.storage.local.set({ entries });
+    renderEntries(entries);
   });
+});
 
-  stopBtn.addEventListener('click', () => {
-    clearInterval(timerInterval);
-    const duration = Date.now() - timerState.startTime;
-    const entry = {
-      id: Date.now(),
-      project: 'Timer',
-      date: new Date().toISOString().split('T')[0],
-      startTime: timerState.startTime,
-      endTime: Date.now(),
-      duration: duration / 3600000,
-      notes: 'Auto-timed session'
-    };
-    chrome.storage.local.get(['entries'], (data) => {
-      const entries = data.entries || [];
-      entries.unshift(entry);
-      chrome.storage.local.set({ entries });
-      renderEntries(entries);
-      todaySummary.textContent = `Today: ${formatDuration(duration / 3600000)}`;
-    });
-    timerState = { running: false, startTime: null };
-    saveTimerState();
-    timerDisplay.textContent = '00:00:00';
-    startBtn.disabled = false;
-    pauseBtn.disabled = true;
-    stopBtn.disabled = true;
+function renderEntries(entries) {
+  const list = document.getElementById('entries-list');
+  list.innerHTML = '';
+  const recent = entries.slice(-5).reverse();
+  recent.forEach(e => {
+    const li = document.createElement('li');
+    li.textContent = `${e.project} (${e.date}) - ${(e.duration / 60000).toFixed(2)}m`;
+    list.appendChild(li);
   });
+}
 
-  function saveTimerState() {
-    chrome.storage.local.set({ timer: timerState });
-  }
-
-  function formatDuration(hours) {
-    const h = Math.floor(hours);
-    const m = Math.floor((hours % 1) * 60);
-    return `${h}h ${m}m`;
-  }
-
-  entryForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const projectName = document.getElementById('project-name').value.trim();
-    const date = document.getElementById('entry-date').value;
-    const hours = parseFloat(document.getElementById('hours').value) || 0;
-    const minutes = parseFloat(document.getElementById('minutes').value) || 0;
-    const notes = document.getElementById('notes').value.trim();
-
-    if (!projectName || !date) {
-      alert('Please enter a project name and date.');
-      return;
-    }
-
-    const duration = hours + minutes / 60;
-    const entry = {
-      id: Date.now(),
-      project: projectName,
-      date: date,
-      startTime: null,
-      endTime: null,
-      duration: duration,
-      notes: notes
-    };
-
-    chrome.storage.local.get(['entries'], (data) => {
-      const entries = data.entries || [];
-      entries.unshift(entry);
-      chrome.storage.local.set({ entries });
-      renderEntries(entries);
-      updateTodaySummary(entries);
-      entryForm.reset();
-    });
-  });
-
-  function renderEntries(entries) {
-    entriesList.innerHTML = '';
-    const recent = entries.slice(0, 5);
-    recent.forEach(entry => {
-      const li = document.createElement('li');
-      li.textContent = `${entry.project} (${entry.date}) - ${formatDuration(entry.duration)} ${entry.notes ? `| ${entry.notes}` : ''}`;
-      entriesList.appendChild(li);
-    });
-    updateTodaySummary(entries);
-  }
-
-  function updateTodaySummary(entries) {
-    const today = new Date().toISOString().split('T')[0];
-    const todayEntries = entries.filter(e => e.date === today);
-    const total = todayEntries.reduce((sum, e) => sum + e.duration, 0);
-    todaySummary.textContent = `Today: ${formatDuration(total)}`;
-  }
-
-  clearBtn.addEventListener('click', () => {
-    if (confirm('Clear all entries?')) {
-      chrome.storage.local.set({ entries: [] });
-      renderEntries([]);
-    }
-  });
-
-  exportJsonBtn.addEventListener('click', () => {
-    chrome.storage.local.get(['entries'], (data) => {
-      const entries = data.entries || [];
-      const json = JSON.stringify(entries, null, 2);
-      downloadFile(json, 'localtrack-export.json', 'application/json');
-    });
-  });
-
-  exportCsvBtn.addEventListener('click', () => {
-    chrome.storage.local.get(['entries'], (data) => {
-      const entries = data.entries || [];
-      const csv = entries.map(e => 
-        `${e.project},${e.date},${e.duration.toFixed(2)},${e.notes.replace(/,/g, '')}`
-      ).join('\n');
-      const header = 'Project,Date,Duration (h),Notes\n';
-      downloadFile(header + csv, 'localtrack-export.csv', 'text/csv');
-    });
-  });
-
-  function downloadFile(content, filename, type) {
-    const blob = new Blob([content], { type });
+// Export
+document.getElementById('export-json').addEventListener('click', () => {
+  chrome.storage.local.get(['entries'], (data) => {
+    const blob = new Blob([JSON.stringify(data.entries, null, 2)]);
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = filename;
+    a.download = 'localtrack-export.json';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
+  });
+});
+
+document.getElementById('export-csv').addEventListener('click', () => {
+  chrome.storage.local.get(['entries'], (data) => {
+    const entries = data.entries || [];
+    const csv = entries.map(e => 
+      `${e.project},${e.date},${(e.duration/60000).toFixed(2)},"${e.notes}"`
+    ).join('\n');
+    const header = 'Project,Date,Duration (min),Notes\n';
+    const blob = new Blob([header + csv]);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'localtrack-export.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  });
+});
+
+// Clear Data
+document.getElementById('clear-data').addEventListener('click', () => {
+  chrome.storage.local.clear(() => {
+    renderEntries([]);
+    state.elapsed = 0;
+    state.startTime = null;
+    state.running = false;
+    updateTimerDisplay();
+  });
 });

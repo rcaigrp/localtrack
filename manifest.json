@@ -1,12 +1,16 @@
 {
   "manifest_version": 3,
   "name": "LocalTrack",
-  "version": "1.0",
+  "version": "1.0.0",
   "permissions": ["storage", "tabs"],
   "background": {
     "service_worker": "background.js"
   },
   "action": {
     "default_popup": "index.html"
+  },
+  "icons": {
+    "48": "icons/icon48.png",
+    "96": "icons/icon96.png"
   }
 }

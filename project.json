@@ -3,12 +3,12 @@
   "acceptance_criteria": [
     "Extension installs and launches without errors",
     "Timer persists across popup close/open",
-    "Manual entries save and retrieve correctly",
-    "Export generates valid files",
-    "No network requests",
+    "Manual entries save and retrieve correctly from local storage",
+    "Export generates valid JSON and CSV files",
+    "No network requests; all logic is client-side",
     "UI is responsive and clean"
   ],
   "meeting_budget": 5,
-  "meetings_held": 2,
+  "meetings_held": 3,
   "status": "active"
 }

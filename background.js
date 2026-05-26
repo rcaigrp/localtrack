@@ -1,5 +1,6 @@
-chrome.storage.onChanged.addListener((changes) => {
-  if (changes.timer) {
-    console.log("Timer state updated:", changes.timer.newValue);
+// Service worker for persistent timer state
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'syncState') {
+    chrome.storage.local.set({ timerState: request.state });
   }
 });
