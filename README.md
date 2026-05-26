@@ -24,7 +24,7 @@ Build a privacy-first, local-only Browser Extension called 'LocalTrack' for trac
 6. UI is responsive and clean.
 
 ## Status
-COMPLETE. All acceptance criteria verified and passing.
+COMPLETE. All acceptance criteria verified and passing. Budget exhausted.
 
 ## Completed Work
 - Implemented MV3 manifest.
@@ -38,4 +38,4 @@ COMPLETE. All acceptance criteria verified and passing.
 - None.
 
 ## Next Steps
-- Project is complete. No further work needed.
+- Project closed. Ready for new project.
