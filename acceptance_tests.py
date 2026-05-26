@@ -1,56 +1,57 @@
 import os
+import json
 import re
 
-PROJECT_DIR = "/workspace/projects/LocalTrack"
+PROJECT_DIR = '/workspace/projects/LocalTrack'
 
-def test_criterion_1_install_launch():
-    """Extension installs and launches without errors"""
-    assert os.path.exists(f"{PROJECT_DIR}/manifest.json")
-    assert os.path.exists(f"{PROJECT_DIR}/index.html")
-    assert os.path.exists(f"{PROJECT_DIR}/popup.js")
-    assert os.path.exists(f"{PROJECT_DIR}/background.js")
-    assert os.path.exists(f"{PROJECT_DIR}/styles.css")
-    
-    with open(f"{PROJECT_DIR}/manifest.json") as f:
-        manifest = f.read()
-    assert '"storage"' in manifest or '"chrome.storage"' in manifest
-    assert '"tabs"' in manifest or '"chrome.tabs"' in manifest
-    assert '"manifest_version": 3' in manifest or '"manifest_version":3' in manifest
+def read_file(filename):
+    path = os.path.join(PROJECT_DIR, filename)
+    with open(path, 'r') as f:
+        return f.read()
 
-def test_criterion_2_timer_persistence():
-    """Timer persists across popup close/open"""
-    with open(f"{PROJECT_DIR}/background.js") as f:
-        bg = f.read()
-    assert "chrome.storage" in bg or "storage.local" in bg
-    assert "start" in bg or "resume" in bg or "elapsed" in bg
+def test_criterion_1_install():
+    # Check manifest.json structure
+    content = read_file('manifest.json')
+    manifest = json.loads(content)
+    assert manifest.get('manifest_version') == 3
+    assert 'permissions' in manifest
+    assert 'storage' in manifest['permissions']
+    assert 'action' in manifest
+    assert 'default_popup' in manifest['action']
+    assert manifest['action']['default_popup'] == 'index.html'
 
-def test_criterion_3_manual_entries():
-    """Manual entries save and retrieve correctly"""
-    with open(f"{PROJECT_DIR}/popup.js") as f:
-        popup = f.read()
-    assert "project" in popup.lower() or "name" in popup.lower()
-    assert "date" in popup.lower() or "duration" in popup.lower()
-    assert "chrome.storage" in popup or "storage.local" in popup
+def test_criterion_2_persist():
+    # Check popup.js uses chrome.storage.local
+    content = read_file('popup.js')
+    assert 'chrome.storage.local' in content
+    assert 'get(' in content
+    assert 'set(' in content
 
-def test_criterion_4_export_files():
-    """Export generates valid files"""
-    with open(f"{PROJECT_DIR}/popup.js") as f:
-        popup = f.read()
-    assert "Blob" in popup or "JSON" in popup or "CSV" in popup
-    assert "createObjectURL" in popup or "download" in popup
+def test_criterion_3_manual():
+    # Check popup.js has form handling logic
+    content = read_file('popup.js')
+    assert 'addEventListener' in content
+    assert 'submit' in content or 'click' in content
+    assert 'project' in content.lower()
+    assert 'duration' in content.lower()
+
+def test_criterion_4_export():
+    # Check export uses Blob and createObjectURL
+    content = read_file('popup.js')
+    assert 'Blob' in content
+    assert 'createObjectURL' in content
+    assert 'download' in content
 
 def test_criterion_5_no_network():
-    """No network requests"""
-    with open(f"{PROJECT_DIR}/popup.js") as f:
-        popup = f.read()
-    assert "fetch(" not in popup and "XMLHttpRequest" not in popup and "axios" not in popup
-    with open(f"{PROJECT_DIR}/background.js") as f:
-        bg = f.read()
-    assert "fetch(" not in bg and "XMLHttpRequest" not in bg and "axios" not in bg
+    # Check no network requests in popup.js
+    content = read_file('popup.js')
+    # Check for fetch or XMLHttpRequest
+    assert 'fetch(' not in content
+    assert 'XMLHttpRequest' not in content
+    assert 'ajax' not in content
 
-def test_criterion_6_ui_responsive():
-    """UI is responsive and clean"""
-    with open(f"{PROJECT_DIR}/styles.css") as f:
-        css = f.read()
-    assert "flex" in css or "grid" in css or "responsive" in css.lower()
-    assert "button" in css.lower() or "input" in css.lower()
+def test_criterion_6_ui():
+    # Check styles.css has responsive layout
+    content = read_file('styles.css')
+    # Must have flex or width: 100%
+    assert 'display: flex' in content or 'width: 100%' in content

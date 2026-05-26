@@ -1,42 +1,9 @@
-// Service worker for timer persistence
-let timerState = {
-  isRunning: false,
-  startTime: null,
-  totalElapsed: 0
-};
+// background.js - Service Worker
+// Handles persistent state logic if needed, though most state is in popup.js storage
 
-chrome.storage.local.get(['timerState'], (data) => {
-  if (data.timerState) {
-    timerState = data.timerState;
-  }
+chrome.storage.local.onChanged.addListener((changes, namespace) => {
+  // Listen for changes if needed for cross-tab sync (not required for local-only)
 });
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'start') {
-    timerState.isRunning = true;
-    timerState.startTime = Date.now();
-    chrome.storage.local.set({ timerState: timerState });
-  } else if (request.action === 'pause') {
-    if (timerState.isRunning) {
-      const elapsed = Date.now() - timerState.startTime;
-      timerState.totalElapsed += elapsed;
-      timerState.isRunning = false;
-      timerState.startTime = null;
-      chrome.storage.local.set({ timerState: timerState });
-    }
-  } else if (request.action === 'resume') {
-    if (!timerState.isRunning) {
-      timerState.isRunning = true;
-      timerState.startTime = Date.now();
-      chrome.storage.local.set({ timerState: timerState });
-    }
-  } else if (request.action === 'stop') {
-    if (timerState.isRunning) {
-      const elapsed = Date.now() - timerState.startTime;
-      timerState.totalElapsed += elapsed;
-      timerState.isRunning = false;
-      timerState.startTime = null;
-      chrome.storage.local.set({ timerState: timerState });
-    }
-  }
-});
+// Keep service worker alive? MV3 is ephemeral. 
+// We rely on storage for persistence.

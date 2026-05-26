@@ -3,6 +3,18 @@
   "name": "LocalTrack",
   "version": "1.0",
   "permissions": ["storage", "tabs"],
-  "background": { "service_worker": "background.js" },
-  "action": { "default_popup": "index.html" }
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png"
+  }
 }

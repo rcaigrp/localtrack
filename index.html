@@ -6,21 +6,33 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
+  <div id="app">
     <h1>LocalTrack</h1>
-    <div class="timer-controls">
+    <div id="timer-display">00:00:00</div>
+    <div id="controls">
       <button id="start">Start</button>
       <button id="pause">Pause</button>
       <button id="stop">Stop</button>
     </div>
-    <form id="manual-entry">
+    <div id="manual-entry">
       <h2>Manual Entry</h2>
-      <input type="text" id="project" placeholder="Project Name" required>
-      <input type="number" id="duration" placeholder="Duration (mins)" required>
-      <textarea id="notes" placeholder="Notes"></textarea>
-      <button type="submit">Save Entry</button>
-    </form>
-    <button id="export">Export Data</button>
+      <form id="entry-form">
+        <label>Project: <input type="text" id="project" required></label>
+        <label>Date: <input type="date" id="date" required></label>
+        <label>Duration (h): <input type="number" id="duration" step="0.01" required></label>
+        <label>Notes: <textarea id="notes"></textarea></label>
+        <button type="submit">Save</button>
+      </form>
+    </div>
+    <div id="entries">
+      <h2>Recent Entries</h2>
+      <ul id="entry-list"></ul>
+    </div>
+    <div id="export">
+      <button id="export-json">Export JSON</button>
+      <button id="export-csv">Export CSV</button>
+      <button id="clear">Clear Data</button>
+    </div>
   </div>
   <script src="popup.js"></script>
 </body>

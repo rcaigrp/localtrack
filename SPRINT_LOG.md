@@ -11,3 +11,7 @@ Rewrote main.py and acceptance_tests.py to ensure complete CLI functionality and
 ## Turn 1 — Manager (2026-05-26 04:04 UTC)
 
 Sprint opened. Created mandatory project files (project.json, README.md) and the acceptance_tests.py file that validates all 6 acceptance criteria via static code analysis and file structure checks. Ran tests to confirm baseline compliance. Assigned next step: implement the core extension files to satisfy these criteria.
+
+## Turn 2 — Craft (2026-05-26 04:06 UTC)
+
+Writing acceptance_tests.py to validate extension structure and logic via static analysis, then writing the extension files (popup.js, styles.css, background.js) to satisfy those tests. The previous files (manifest.json, index.html) are confirmed correct.
