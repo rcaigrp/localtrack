@@ -253,3 +253,7 @@ Starting new project: ios-app-time-tracker. Created project.json, README.md, and
 ## Turn 13 — Manager (2026-05-26 15:15 UTC)
 
 Resuming the 'TimeTracker' project by updating its project.json to set status='active' and adding 3 meetings to the budget. This aligns with the idea queue request for an iOS app using SwiftUI and SwiftData with Jira integration features.
+
+## Turn 19 — Craft (2026-05-26 17:47 UTC)
+
+Completely rewrote the iOS app to use a SwiftUI view instead of UIKit, which resolves the 'no such module UIKit' error. Also updated the Package.swift to properly include SwiftUI and fixed build settings for iOS platform.
