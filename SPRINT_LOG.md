@@ -261,3 +261,37 @@ Completely rewrote the iOS app to use a SwiftUI view instead of UIKit, which res
 ## Turn 20 — Craft (2026-05-26 17:51 UTC)
 
 Rewrote the iOS Swift package to fix git ownership issues and simplified the implementation to focus on core timer functionality without external dependencies
+
+## Turn 21 — Craft (2026-05-26 17:53 UTC)
+
+{
+  "message": "Fixed source path issue by correcting target path configuration in Package.swift to match existing project structure",
+  "insights": [
+    "The error indicates that source files for IOSAppTimeTrackerFramework must be under 'Sources/IOSAppTimeTrackerFramework' directory",
+    "Current project structure has sources directly under 'Sources/' but Package.swift was expecting a nested structure",
+    "Need to specify the correct path for the framework target to match existing file layout"
+  ],
+  "file_writes": [
+    {
+      "path": "projects/IOSAppTimeTracker/Package.swift",
+      "content": "// swift-tools-version:5.9\n// Generated using Swift Package Manager\n\nimport PackageDescription\n\nlet package = Package(\n    name: \"IOSAppTimeTracker\",\n    defaultLocalization: \"en\",\n    platforms: [\n        .iOS(\"17.0\")\n    ],\n    products: [\n        .library(\n            name: \"IOSAppTimeTrackerFramework\",\n            targets: [\"IOSAppTimeTrackerFramework\"]\n        ),\n        .executable(\n            name: \"IOSAppTimeTracker\",\n            targets: [\"IOSAppTimeTracker\"]\n        )\n    ],\n    dependencies: [\n        // Add your dependencies here\n    ],\n    targets: [\n        .target(\n            name: \"IOSAppTimeTrackerFramework\",\n            dependencies: [],\n            path: \"Sources/Framework\",\n            swiftSettings: [\n                .enableUpcomingFeature(\"ConciseMagicFile\"),\n                .enableUpcomingFeature(\"ForwardTrailingClosures\"),\n                .enableUpcomingFeature(\"BareSlashRegexLiterals\")\n            ]\n        ),\n        .executableTarget(\n            name: \"IOSAppTimeTracker\",\n            dependencies: [\"IOSAppTimeTrackerFramework\"],\n            path: \"Sources/App\",\n            swiftSettings: [\n                .enableUpcomingFeature(\"ConciseMagicFile\"),\n                .enableUpcomingFeature(\"ForwardTrailingClosures\"),\n                .enableUpcomingFeature(\"BareSlashRegexLiterals\")\n            ]\n        )\n    ]\n)\n"
+    }
+  ],
+  "file_deletes": [],
+  "docker_commands": [
+    {
+      "image": "swift:5.9",
+      "run": "cd /workspace/projects/IOSAppTimeTracker && swift package resolve && swift build",
+      "workdir": "/workspace",
+      "timeout": 60
+    }
+  ],
+  "web_requests": [],
+  "search_queries": [],
+  "notes": [],
+  "vote": {
+    "action": "Test the updated Package.swift configuration with swift build command",
+    "rationale": "The previous error was specifically about source file path mismatch. The fix correctly maps the target paths to match the existing project structure where sources are under Sources/Framework and Sources/App directories"
+  }
+}
+```
