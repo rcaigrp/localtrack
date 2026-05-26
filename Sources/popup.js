@@ -1,118 +1,143 @@
-const timerDisplay = document.getElementById('timer');
-const startButton = document.getElementById('startBtn');
-const pauseButton = document.getElementById('pauseBtn');
-const resetButton = document.getElementById('resetBtn');
-const manualEntryForm = document.getElementById('manualEntryForm');
-const exportButton = document.getElementById('exportBtn');
-
-let startTime = 0;
-let elapsedTime = 0;
-let timerInterval = null;
+let timerInterval;
+let seconds = 0;
 let isRunning = false;
 
-// Timer state management
-const saveTimerState = (state) => {
-  chrome.storage.local.set({timerState: state});
+// DOM elements
+const startStopBtn = document.getElementById('startStopBtn');
+const resetBtn = document.getElementById('resetBtn');
+const timeDisplay = document.getElementById('timeDisplay');
+const projectForm = document.getElementById('projectForm');
+const projectNameInput = document.getElementById('projectName');
+const projectDescInput = document.getElementById('projectDesc');
+const entriesList = document.getElementById('entriesList');
+
+// Load saved data on popup open
+window.onload = function() {
+  loadTimerState();
+  loadEntries();
 };
 
-const loadTimerState = () => {
-  return new Promise((resolve) => {
-    chrome.storage.local.get(['timerState'], (result) => {
-      resolve(result.timerState || null);
-    });
-  });
-};
-
-// Format time in HH:MM:SS
-const formatTime = (ms) => {
-  let seconds = Math.floor(ms / 1000);
-  let minutes = Math.floor(seconds / 60);
-  let hours = Math.floor(minutes / 60);
-  
-  seconds = seconds % 60;
-  minutes = minutes % 60;
-  
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-};
-
-// Update timer display
-const updateDisplay = () => {
-  const currentTime = Date.now();
-  const totalElapsed = elapsedTime + (isRunning ? (currentTime - startTime) : 0);
-  timerDisplay.textContent = formatTime(totalElapsed);
-};
-
-// Animation frame based timer update
-const animateTimer = () => {
+// Timer functions
+function startStopTimer() {
   if (isRunning) {
-    updateDisplay();
-    // Save state on every animation frame for smooth persistence
-    saveTimerState({
-      isRunning,
-      elapsedTime,
-      startTime: Date.now() - (elapsedTime % 1000)
-    });
-    requestAnimationFrame(animateTimer);
-  } else {
-    updateDisplay();
-  }
-};
-
-// Start timer
-const startTimer = () => {
-  if (!isRunning) {
-    isRunning = true;
-    startTime = Date.now() - elapsedTime;
-    animateTimer();
-  }
-};
-
-// Pause timer
-const pauseTimer = () => {
-  if (isRunning) {
+    clearInterval(timerInterval);
     isRunning = false;
-    const currentTime = Date.now();
-    elapsedTime += (currentTime - startTime);
-    saveTimerState({
-      isRunning,
-      elapsedTime,
-      startTime: null
-    });
+    startStopBtn.textContent = 'Start';
+  } else {
+    isRunning = true;
+    startStopBtn.textContent = 'Pause';
+    timerInterval = setInterval(() => {
+      seconds++;
+      updateDisplay();
+      saveTimerState(); // Save state on every tick
+    }, 1000);
   }
-};
+}
 
-// Reset timer
-const resetTimer = () => {
+function resetTimer() {
+  clearInterval(timerInterval);
   isRunning = false;
-  elapsedTime = 0;
-  startTime = 0;
-  saveTimerState({
-    isRunning,
-    elapsedTime,
-    startTime: null
-  });
+  seconds = 0;
+  startStopBtn.textContent = 'Start';
   updateDisplay();
-};
+  saveTimerState(); // Save state after reset
+}
 
-// Load saved timer state on popup open
-const initializeTimer = async () => {
-  const savedState = await loadTimerState();
-  if (savedState) {
-    isRunning = savedState.isRunning;
-    elapsedTime = savedState.elapsedTime;
-    
-    if (isRunning) {
-      startTime = Date.now() - elapsedTime;
-      animateTimer();
+function updateDisplay() {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  timeDisplay.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+// Timer persistence functions
+function saveTimerState() {
+  const timerData = {
+    seconds: seconds,
+    isRunning: isRunning
+  };
+  chrome.storage.local.set({timerData: timerData});
+}
+
+function loadTimerState() {
+  chrome.storage.local.get(['timerData'], function(result) {
+    if (result.timerData) {
+      seconds = result.timerData.seconds;
+      isRunning = result.timerData.isRunning;
+      updateDisplay();
+      
+      if (isRunning) {
+        startStopBtn.textContent = 'Pause';
+        timerInterval = setInterval(() => {
+          seconds++;
+          updateDisplay();
+          saveTimerState();
+        }, 1000);
+      }
     }
+  });
+}
+
+// Manual entry functions
+function saveEntry(projectName, projectDesc) {
+  const newEntry = {
+    id: Date.now(), // Simple unique ID
+    name: projectName,
+    description: projectDesc,
+    timeSpent: seconds
+  };
+  
+  chrome.storage.local.get(['entries'], function(result) {
+    let entries = result.entries || [];
+    entries.push(newEntry);
+    chrome.storage.local.set({entries: entries}, function() {
+      loadEntries(); // Reload entries after saving
+    });
+  });
+}
+
+function loadEntries() {
+  chrome.storage.local.get(['entries'], function(result) {
+    const entries = result.entries || [];
+    renderEntries(entries);
+  });
+}
+
+function renderEntries(entries) {
+  entriesList.innerHTML = '';
+  entries.forEach(entry => {
+    const entryElement = document.createElement('div');
+    entryElement.className = 'entry';
+    entryElement.innerHTML = `
+      <h3>${entry.name}</h3>
+      <p>${entry.description}</p>
+      <p>Time: ${formatTime(entry.timeSpent)}</p>
+    `;
+    entriesList.appendChild(entryElement);
+  });
+}
+
+function formatTime(seconds) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+// Form submission handler
+projectForm.addEventListener('submit', function(e) {
+  e.preventDefault();
+  const projectName = projectNameInput.value.trim();
+  const projectDesc = projectDescInput.value.trim();
+  
+  if (projectName) {
+    saveEntry(projectName, projectDesc);
+    // Clear form
+    projectNameInput.value = '';
+    projectDescInput.value = '';
   }
-  updateDisplay();
-};
+});
 
 // Event listeners
-startButton.addEventListener('click', startTimer);
-pauseButton.addEventListener('click', pauseTimer);
-resetButton.addEventListener('click', resetTimer);
-
-// Initialize timer on popup load
-initializeTimer();
+startStopBtn.addEventListener('click', startStopTimer);
+resetBtn.addEventListener('click', resetTimer);
