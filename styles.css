@@ -1,94 +1,21 @@
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: sans-serif;
   width: 300px;
-  padding: 20px;
-  background-color: #f4f4f4;
-  color: #333;
+  padding: 10px;
+  background-color: #f0f0f0;
 }
-
 .container {
   display: flex;
   flex-direction: column;
-  gap: 15px;
 }
-
-h1, h2 {
-  margin: 0;
-  text-align: center;
+.controls button {
+  margin: 5px;
+  padding: 10px;
 }
-
-.timer-section {
-  text-align: center;
-  padding: 15px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-#timer-display {
-  font-size: 2em;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.timer-controls button {
-  margin: 0 5px;
-  padding: 5px 10px;
-  cursor: pointer;
-}
-
 .manual-entry {
-  background: #fff;
-  padding: 15px;
-  border-radius: 8px;
+  margin-top: 20px;
 }
-
 .manual-entry input, .manual-entry textarea {
-  display: block;
   width: 100%;
-  margin-bottom: 10px;
-  padding: 5px;
-  box-sizing: border-box;
-}
-
-.duration-inputs {
-  display: flex;
-  gap: 5px;
-}
-
-.export-section {
-  display: flex;
-  gap: 5px;
-}
-
-.export-section button {
-  flex: 1;
-  padding: 8px;
-  cursor: pointer;
-}
-
-.history-section {
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-#entry-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  font-size: 0.9em;
-}
-
-#entry-list li {
-  border-bottom: 1px solid #ddd;
-  padding: 5px 0;
-}
-
-#clear-storage {
-  background: #ff4d4d;
-  color: white;
-  border: none;
-  padding: 5px;
-  cursor: pointer;
-  margin-top: 10px;
+  margin-bottom: 5px;
 }

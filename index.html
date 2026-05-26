@@ -8,43 +8,47 @@
 </head>
 <body>
   <div class="container">
-    <h1>LocalTrack</h1>
+    <header>
+      <h1>LocalTrack</h1>
+      <div id="status">Stopped</div>
+    </header>
     
-    <!-- Timer Section -->
-    <div class="timer-section">
-      <div id="timer-display">00:00:00</div>
-      <div class="timer-controls">
-        <button id="start-btn">Start</button>
-        <button id="pause-btn" disabled>Pause</button>
-        <button id="stop-btn" disabled>Stop</button>
-      </div>
+    <div class="timer-display">
+      <span id="timer">00:00:00</span>
     </div>
 
-    <!-- Manual Entry Section -->
+    <div class="controls">
+      <button id="start">Start</button>
+      <button id="pause">Pause</button>
+      <button id="stop">Stop</button>
+    </div>
+
     <div class="manual-entry">
       <h2>Manual Entry</h2>
       <form id="entry-form">
-        <input type="text" id="project-name" placeholder="Project Name" required>
+        <label>Project Name:</label>
+        <input type="text" id="project-name" required>
+        <label>Date:</label>
         <input type="date" id="entry-date" required>
-        <div class="duration-inputs">
-          <input type="number" id="hours" placeholder="Hours" min="0">
-          <input type="number" id="minutes" placeholder="Minutes" min="0" max="59">
+        <label>Duration:</label>
+        <div class="duration">
+          <input type="number" id="hours" placeholder="Hours">
+          <input type="number" id="minutes" placeholder="Minutes">
         </div>
-        <textarea id="notes" placeholder="Notes (optional)"></textarea>
-        <button type="submit">Add Entry</button>
+        <label>Notes:</label>
+        <textarea id="notes" rows="2"></textarea>
+        <button type="submit">Save Entry</button>
       </form>
     </div>
 
-    <!-- Export Section -->
-    <div class="export-section">
-      <button id="export-json">Export JSON</button>
-      <button id="export-csv">Export CSV</button>
+    <div class="entries">
+      <h2>Recent Entries</h2>
+      <ul id="entries-list"></ul>
     </div>
 
-    <!-- History Section -->
-    <div class="history-section">
-      <h2>Recent Entries</h2>
-      <ul id="entry-list"></ul>
+    <div class="actions">
+      <button id="export-json">Export JSON</button>
+      <button id="export-csv">Export CSV</button>
       <button id="clear-storage">Clear Data</button>
     </div>
   </div>

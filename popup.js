@@ -1,141 +1,174 @@
+// popup.js
 document.addEventListener('DOMContentLoaded', () => {
-  const timerDisplay = document.getElementById('timer-display');
-  const startBtn = document.getElementById('start');
-  const pauseBtn = document.getElementById('pause');
-  const stopBtn = document.getElementById('stop');
+  const timerDisplay = document.getElementById('timer');
+  const statusDisplay = document.getElementById('status');
+  const btnStart = document.getElementById('start');
+  const btnPause = document.getElementById('pause');
+  const btnStop = document.getElementById('stop');
   const entryForm = document.getElementById('entry-form');
-  const entriesList = document.getElementById('entries');
+  const entriesList = document.getElementById('entries-list');
+  const btnExportJson = document.getElementById('export-json');
+  const btnExportCsv = document.getElementById('export-csv');
+  const btnClear = document.getElementById('clear-storage');
 
-  let timerInterval;
-  let timerState = { running: false, startTime: null, elapsedTime: 0 };
+  let timerInterval = null;
+  let currentTimer = { startTime: null, elapsedTime: 0 };
+  let entries = [];
 
-  // Load timer state
-  chrome.storage.local.get('timerState', (data) => {
-    if (data.timerState) {
-      timerState = data.timerState;
-      if (timerState.running) {
-        startTimer();
+  loadEntries();
+  loadTimerState();
+  renderEntries();
+  updateTimerDisplay();
+
+  function loadTimerState() {
+    chrome.storage.local.get('timerState', (state) => {
+      if (state.timerState && state.timerState.startTime) {
+        currentTimer.startTime = state.timerState.startTime;
+        currentTimer.elapsedTime = state.timerState.elapsedTime || 0;
+        statusDisplay.textContent = 'Running';
+        resumeTimer();
+      } else {
+        statusDisplay.textContent = 'Stopped';
       }
-    }
-  });
-
-  // Load entries
-  chrome.storage.local.get('entries', (data) => {
-    if (data.entries) {
-      renderEntries(data.entries);
-    }
-  });
-
-  function startTimer() {
-    timerState.running = true;
-    timerState.startTime = Date.now() - timerState.elapsedTime;
-    timerInterval = setInterval(updateTimer, 1000);
-    chrome.storage.local.set({ timerState });
-    startBtn.disabled = true;
-    pauseBtn.disabled = false;
+    });
   }
 
-  function pauseTimer() {
-    clearInterval(timerInterval);
-    timerState.running = false;
-    timerState.elapsedTime = Date.now() - timerState.startTime;
-    chrome.storage.local.set({ timerState });
-    startBtn.disabled = false;
-    pauseBtn.disabled = true;
+  function resumeTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(updateTimerDisplay, 1000);
   }
 
-  function stopTimer() {
-    clearInterval(timerInterval);
-    timerState = { running: false, startTime: null, elapsedTime: 0 };
-    chrome.storage.local.set({ timerState });
-    timerDisplay.textContent = '00:00:00';
-    startBtn.disabled = false;
-    pauseBtn.disabled = true;
-  }
-
-  function updateTimer() {
+  function updateTimerDisplay() {
     const now = Date.now();
-    const elapsed = now - timerState.startTime;
-    const hours = Math.floor(elapsed / 3600000);
-    const minutes = Math.floor((elapsed % 3600000) / 60000);
-    const seconds = Math.floor((elapsed % 60000) / 1000);
-    timerDisplay.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    const totalSeconds = currentTimer.elapsedTime + (currentTimer.startTime ? Math.floor((now - currentTimer.startTime) / 1000) : 0);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    timerDisplay.textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
   }
 
-  startBtn.addEventListener('click', startTimer);
-  pauseBtn.addEventListener('click', pauseTimer);
-  stopBtn.addEventListener('click', stopTimer);
+  function pad(n) {
+    return n < 10 ? '0' + n : n.toString();
+  }
+
+  btnStart.addEventListener('click', () => {
+    if (!currentTimer.startTime) {
+      currentTimer.startTime = Date.now();
+    }
+    statusDisplay.textContent = 'Running';
+    resumeTimer();
+    saveTimerState();
+  });
+
+  btnPause.addEventListener('click', () => {
+    if (currentTimer.startTime) {
+      const now = Date.now();
+      currentTimer.elapsedTime += (now - currentTimer.startTime);
+      currentTimer.startTime = null;
+      statusDisplay.textContent = 'Paused';
+      if (timerInterval) clearInterval(timerInterval);
+      saveTimerState();
+    }
+  });
+
+  btnStop.addEventListener('click', () => {
+    if (currentTimer.startTime) {
+      const now = Date.now();
+      currentTimer.elapsedTime += (now - currentTimer.startTime);
+      currentTimer.startTime = null;
+    }
+    statusDisplay.textContent = 'Stopped';
+    if (timerInterval) clearInterval(timerInterval);
+    saveTimerState();
+  });
+
+  function saveTimerState() {
+    chrome.storage.local.set({ timerState: currentTimer });
+  }
 
   entryForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const project = document.getElementById('project').value;
-    const date = document.getElementById('date').value;
+    const projectName = document.getElementById('project-name').value;
+    const date = document.getElementById('entry-date').value;
     const hours = parseInt(document.getElementById('hours').value) || 0;
     const minutes = parseInt(document.getElementById('minutes').value) || 0;
     const notes = document.getElementById('notes').value;
-    const duration = hours + minutes / 60;
 
-    const entry = {
-      id: Date.now().toString(),
-      project,
-      date,
-      duration,
-      notes,
-      createdAt: new Date().toISOString()
+    const durationSeconds = (hours * 3600) + (minutes * 60);
+    const duration = `${hours}h ${minutes}m`;
+
+    const newEntry = {
+      id: Date.now(),
+      project: projectName,
+      date: date,
+      duration: duration,
+      durationSeconds: durationSeconds,
+      notes: notes,
+      type: 'manual'
     };
 
-    chrome.storage.local.get('entries', (data) => {
-      const entries = data.entries || [];
-      entries.unshift(entry);
-      chrome.storage.local.set({ entries });
-      renderEntries(entries);
-      entryForm.reset();
-    });
+    entries.push(newEntry);
+    saveEntries();
+    renderEntries();
+    entryForm.reset();
   });
 
-  function renderEntries(entries) {
+  function saveEntries() {
+    chrome.storage.local.set({ entries: entries });
+  }
+
+  function loadEntries() {
+    chrome.storage.local.get('entries', (data) => {
+      if (data.entries) {
+        entries = data.entries;
+      } else {
+        entries = [];
+      }
+    });
+  }
+
+  function renderEntries() {
     entriesList.innerHTML = '';
-    entries.forEach(entry => {
+    const recent = entries.slice(0, 5).reverse();
+    recent.forEach(entry => {
       const li = document.createElement('li');
-      li.textContent = `${entry.project} (${entry.date}) - ${entry.duration}h - ${entry.notes}`;
+      li.textContent = `${entry.project} (${entry.date}): ${entry.duration} - ${entry.notes}`;
       entriesList.appendChild(li);
     });
   }
 
-  document.getElementById('export-json').addEventListener('click', () => {
-    chrome.storage.local.get('entries', (data) => {
-      const blob = new Blob([JSON.stringify(data.entries, null, 2)]);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'localtrack_entries.json';
-      a.click();
-      URL.revokeObjectURL(url);
-    });
+  btnExportJson.addEventListener('click', () => {
+    const dataStr = JSON.stringify(entries, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'localtrack_entries.json';
+    a.click();
+    URL.revokeObjectURL(url);
   });
 
-  document.getElementById('export-csv').addEventListener('click', () => {
-    chrome.storage.local.get('entries', (data) => {
-      const entries = data.entries || [];
-      let csv = 'Project,Date,Duration,Notes\n';
-      entries.forEach(entry => {
-        csv += `${entry.project},${entry.date},${entry.duration},${entry.notes}\n`;
-      });
-      const blob = new Blob([csv]);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'localtrack_entries.csv';
-      a.click();
-      URL.revokeObjectURL(url);
+  btnExportCsv.addEventListener('click', () => {
+    let csv = 'Project,Date,Duration,Notes\n';
+    entries.forEach(entry => {
+      csv += `${entry.project},${entry.date},${entry.duration},${entry.notes}\n`;
     });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'localtrack_entries.csv';
+    a.click();
+    URL.revokeObjectURL(url);
   });
 
-  document.getElementById('clear').addEventListener('click', () => {
-    chrome.storage.local.set({ entries: [], timerState: { running: false, startTime: null, elapsedTime: 0 } });
-    timerDisplay.textContent = '00:00:00';
-    entriesList.innerHTML = '';
-    startBtn.disabled = false;
-    pauseBtn.disabled = true;
+  btnClear.addEventListener('click', () => {
+    chrome.storage.local.clear(() => {
+      entries = [];
+      currentTimer = { startTime: null, elapsedTime: 0 };
+      renderEntries();
+      updateTimerDisplay();
+      statusDisplay.textContent = 'Stopped';
+    });
   });
 });
