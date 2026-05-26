@@ -8,41 +8,21 @@
 </head>
 <body>
   <div id="app">
-    <header>
-      <h1>LocalTrack</h1>
-    </header>
-    <section id="timer">
-      <div id="elapsed">00:00:00</div>
-      <div id="controls">
-        <button id="start">Start</button>
-        <button id="pause">Pause</button>
-        <button id="stop">Stop</button>
-      </div>
-    </section>
-    <section id="manual-entry">
-      <h2>Manual Entry</h2>
-      <form id="manual-form">
-        <label>Project: <input type="text" id="project-name" required></label>
-        <label>Date: <input type="date" id="entry-date" required></label>
-        <label>Hours: <input type="number" id="hours" min="0" step="0.5" required></label>
-        <label>Minutes: <input type="number" id="minutes" min="0" max="59" required></label>
-        <label>Notes: <textarea id="notes"></textarea></label>
-        <button type="submit">Save Entry</button>
-      </form>
-    </section>
-    <section id="summary">
-      <h2>Today's Summary</h2>
-      <div id="today-total">0h 0m</div>
-    </section>
-    <section id="entries">
-      <h2>Recent Entries</h2>
-      <ul id="entry-list"></ul>
-    </section>
-    <footer>
-      <button id="export-json">Export JSON</button>
-      <button id="export-csv">Export CSV</button>
-      <button id="clear-storage">Clear Data</button>
-    </footer>
+    <h1>LocalTrack</h1>
+    <div id="timer-display">00:00:00</div>
+    <button id="start-btn">Start</button>
+    <button id="pause-btn">Pause</button>
+    <button id="stop-btn">Stop</button>
+    <h2>Manual Entry</h2>
+    <input type="text" id="project-name" placeholder="Project Name">
+    <input type="date" id="entry-date">
+    <input type="number" id="hours" placeholder="Hours">
+    <input type="number" id="minutes" placeholder="Minutes">
+    <textarea id="notes" placeholder="Notes"></textarea>
+    <button id="add-entry-btn">Add Entry</button>
+    <button id="export-json-btn">Export JSON</button>
+    <button id="export-csv-btn">Export CSV</button>
+    <ul id="entry-list"></ul>
   </div>
   <script src="popup.js"></script>
 </body>

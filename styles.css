@@ -1,11 +1,6 @@
-body { font-family: system-ui, sans-serif; margin: 0; padding: 10px; width: 300px; }
+body { font-family: sans-serif; padding: 10px; width: 300px; }
 #app { display: flex; flex-direction: column; gap: 10px; }
-#elapsed { font-size: 2rem; text-align: center; }
-#controls button { margin: 2px; }
-form { display: grid; gap: 5px; }
-form label { display: flex; flex-direction: column; }
-#today-total { font-size: 1.2rem; text-align: center; }
+button { padding: 5px; cursor: pointer; }
+input, textarea { width: 100%; box-sizing: border-box; }
+#timer-display { font-size: 24px; text-align: center; }
 #entry-list { list-style: none; padding: 0; }
-#entry-list li { padding: 5px; border-bottom: 1px solid #ccc; }
-footer { display: flex; gap: 5px; }
-footer button { flex: 1; }
