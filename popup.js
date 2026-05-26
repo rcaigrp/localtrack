@@ -1,97 +1,97 @@
 document.addEventListener('DOMContentLoaded', () => {
-  initTimer();
-  initManualEntry();
-  loadEntries();
-  loadSummary();
-});
-
-function initTimer() {
   const startBtn = document.getElementById('start-btn');
   const pauseBtn = document.getElementById('pause-btn');
   const stopBtn = document.getElementById('stop-btn');
-  const display = document.getElementById('timer-display');
+  const timerDisplay = document.getElementById('timer-display');
+  const entryForm = document.getElementById('entry-form');
+  const entriesList = document.getElementById('entries-list');
+  const summary = document.getElementById('summary');
+  const exportJsonBtn = document.getElementById('export-json');
+  const exportCsvBtn = document.getElementById('export-csv');
+  const clearStorageBtn = document.getElementById('clear-storage');
 
-  let intervalId = null;
-  let timerState = { status: 'stopped', startTime: 0, elapsed: 0 };
+  let timerInterval = null;
+  let timerState = {
+    isRunning: false,
+    startTime: null,
+    elapsed: 0
+  };
+
+  function formatTime(seconds) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
 
   function updateDisplay() {
-    const elapsed = Date.now() - timerState.startTime - timerState.elapsed;
-    const total = timerState.elapsed + elapsed;
-    const hours = Math.floor(total / 3600000);
-    const minutes = Math.floor((total % 3600000) / 60000);
-    const seconds = Math.floor((total % 60000) / 1000);
-    display.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    const totalSeconds = Math.floor(timerState.elapsed / 1000) + Math.floor((Date.now() - (timerState.isRunning && timerState.startTime ? timerState.startTime : Date.now())) / 1000);
+    if (timerState.isRunning) {
+      timerDisplay.textContent = formatTime(totalSeconds);
+    } else {
+      timerDisplay.textContent = formatTime(Math.floor(timerState.elapsed / 1000));
+    }
   }
 
   function loadState() {
     chrome.storage.local.get('timerState', (data) => {
       if (data.timerState) {
         timerState = data.timerState;
-        if (timerState.status === 'running') {
+        if (timerState.isRunning) {
           startTimer();
-        } else {
-          updateDisplay();
         }
-      } else {
-        timerState = { status: 'stopped', startTime: 0, elapsed: 0 };
       }
+      updateDisplay();
     });
   }
 
+  function saveState() {
+    chrome.storage.local.set({ timerState });
+  }
+
   function startTimer() {
-    timerState.status = 'running';
+    timerState.isRunning = true;
     timerState.startTime = Date.now();
-    chrome.storage.local.set({ timerState: timerState });
-    intervalId = setInterval(updateDisplay, 1000);
-    updateDisplay();
+    saveState();
+    startBtn.disabled = true;
+    pauseBtn.disabled = false;
+    stopBtn.disabled = false;
+    timerInterval = setInterval(updateDisplay, 1000);
   }
 
   function pauseTimer() {
-    if (timerState.status === 'running') {
-      timerState.status = 'paused';
-      timerState.elapsed += Date.now() - timerState.startTime;
-      clearInterval(intervalId);
-      chrome.storage.local.set({ timerState: timerState });
-    }
+    timerState.isRunning = false;
+    timerState.elapsed += Date.now() - timerState.startTime;
+    saveState();
+    clearInterval(timerInterval);
+    startBtn.disabled = false;
+    pauseBtn.disabled = true;
+    stopBtn.disabled = true;
+    updateDisplay();
   }
 
   function stopTimer() {
-    if (timerState.status === 'running' || timerState.status === 'paused') {
-      clearInterval(intervalId);
-      if (timerState.status === 'running') {
-        timerState.elapsed += Date.now() - timerState.startTime;
-      }
-      timerState.status = 'stopped';
-      timerState.startTime = 0;
-      chrome.storage.local.set({ timerState: timerState });
-      updateDisplay();
-    }
+    timerState.isRunning = false;
+    timerState.elapsed += Date.now() - timerState.startTime;
+    saveState();
+    clearInterval(timerInterval);
+    startBtn.disabled = false;
+    pauseBtn.disabled = true;
+    stopBtn.disabled = true;
+    updateDisplay();
   }
 
   startBtn.addEventListener('click', startTimer);
   pauseBtn.addEventListener('click', pauseTimer);
   stopBtn.addEventListener('click', stopTimer);
 
-  loadState();
-}
-
-function initManualEntry() {
-  const form = document.getElementById('entry-form');
-  const saveBtn = document.getElementById('save-entry-btn');
-
-  saveBtn.addEventListener('click', async () => {
+  entryForm.addEventListener('submit', (e) => {
+    e.preventDefault();
     const project = document.getElementById('project').value;
     const date = document.getElementById('date').value;
-    const hours = parseFloat(document.getElementById('hours').value) || 0;
-    const minutes = parseFloat(document.getElementById('minutes').value) || 0;
+    const duration = parseInt(document.getElementById('duration').value);
     const notes = document.getElementById('notes').value;
 
-    if (!project || !date) {
-      alert('Please enter a project name and date.');
-      return;
-    }
-
-    const duration = hours + minutes / 60;
     const entry = {
       id: Date.now().toString(),
       project,
@@ -100,79 +100,69 @@ function initManualEntry() {
       notes
     };
 
-    try {
-      const data = await chrome.storage.local.get('entries');
+    chrome.storage.local.get('entries', (data) => {
       const entries = data.entries || [];
       entries.push(entry);
-      await chrome.storage.local.set({ entries: entries });
-      loadEntries();
-      loadSummary();
-      form.reset();
-    } catch (err) {
-      console.error('Error saving entry:', err);
-    }
+      chrome.storage.local.set({ entries }, () => {
+        loadEntries();
+        entryForm.reset();
+      });
+    });
   });
-}
 
-async function loadEntries() {
-  const data = await chrome.storage.local.get('entries');
-  const entries = data.entries || [];
-  const list = document.getElementById('entries-list');
-  list.innerHTML = '';
-  entries.slice(-5).reverse().forEach(entry => {
-    const li = document.createElement('li');
-    li.textContent = `${entry.project} - ${entry.date} (${entry.duration}h)`;
-    list.appendChild(li);
+  function loadEntries() {
+    chrome.storage.local.get('entries', (data) => {
+      const entries = data.entries || [];
+      entriesList.innerHTML = '';
+      let totalDuration = 0;
+      entries.slice().reverse().forEach(entry => {
+        const li = document.createElement('li');
+        li.textContent = `${entry.project} (${entry.date}) - ${entry.duration}m`;
+        if (entry.notes) li.textContent += ` [${entry.notes}]`;
+        entriesList.appendChild(li);
+        totalDuration += entry.duration;
+      });
+      const totalHours = Math.floor(totalDuration / 60);
+      const totalMinutes = totalDuration % 60;
+      summary.textContent = `Total: ${totalHours}h ${totalMinutes}m`;
+    });
+  }
+
+  exportJsonBtn.addEventListener('click', () => {
+    chrome.storage.local.get('entries', (data) => {
+      const entries = data.entries || [];
+      const blob = new Blob([JSON.stringify(entries, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'localtrack_entries.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
   });
-}
 
-async function loadSummary() {
-  const data = await chrome.storage.local.get('entries');
-  const entries = data.entries || [];
-  const today = new Date().toISOString().split('T')[0];
-  const todayEntries = entries.filter(e => e.date === today);
-  const total = todayEntries.reduce((sum, e) => sum + e.duration, 0);
-  document.getElementById('today-total').textContent = `${total.toFixed(2)} hours`;
-}
-
-document.getElementById('export-json-btn').addEventListener('click', () => {
-  chrome.storage.local.get('entries', (data) => {
-    const entries = data.entries || [];
-    const json = JSON.stringify(entries, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'localtrack_entries.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  exportCsvBtn.addEventListener('click', () => {
+    chrome.storage.local.get('entries', (data) => {
+      const entries = data.entries || [];
+      const csv = entries.map(e => `${e.project},${e.date},${e.duration},"${e.notes}"`).join('\n');
+      const header = 'Project,Date,Duration(min),Notes\n';
+      const blob = new Blob([header + csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'localtrack_entries.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
   });
-});
 
-document.getElementById('export-csv-btn').addEventListener('click', () => {
-  chrome.storage.local.get('entries', (data) => {
-    const entries = data.entries || [];
-    const csv = [
-      ['id', 'project', 'date', 'duration', 'notes'],
-      ...entries.map(e => [e.id, e.project, e.date, e.duration, e.notes])
-    ].map(row => row.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'localtrack_entries.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  clearStorageBtn.addEventListener('click', () => {
+    chrome.storage.local.clear();
+    timerState = { isRunning: false, startTime: null, elapsed: 0 };
+    loadEntries();
+    updateDisplay();
   });
-});
 
-document.getElementById('clear-storage-btn').addEventListener('click', () => {
-  chrome.storage.local.clear();
+  loadState();
   loadEntries();
-  loadSummary();
-  alert('Storage cleared.');
 });

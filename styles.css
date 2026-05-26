@@ -1,40 +1,50 @@
 body {
   font-family: sans-serif;
-  width: 300px;
   margin: 0;
   padding: 10px;
-  box-sizing: border-box;
+  width: 300px;
 }
-
-#popup {
+#app {
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
-
-button {
-  padding: 8px;
-  cursor: pointer;
-}
-
-#timer-display {
-  font-size: 24px;
+header {
   text-align: center;
-  margin-bottom: 10px;
 }
-
-#manual-entry form {
+#timer-display {
+  font-size: 2em;
+  margin: 10px 0;
+}
+#timer-controls button {
+  margin: 5px;
+}
+#manual-entry {
+  margin: 10px 0;
+}
+#entry-form {
   display: flex;
   flex-direction: column;
-  gap: 5px;
 }
-
+#entry-form input, #entry-form textarea {
+  margin: 5px 0;
+  width: 100%;
+}
+#entries {
+  margin-top: 10px;
+}
 #entries-list {
   list-style: none;
   padding: 0;
 }
-
 #entries-list li {
   border-bottom: 1px solid #ccc;
   padding: 5px 0;
+}
+#export-controls {
+  display: flex;
+  gap: 5px;
+  margin-top: 10px;
+}
+#export-controls button {
+  flex: 1;
 }
