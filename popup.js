@@ -1,166 +1,192 @@
-// Core logic for timer, manual entry, storage, export
-const state = {
-  running: false,
-  startTime: null,
-  elapsed: 0,
-  intervalId: null
-};
+// popup.js
+const STORAGE_KEY = 'localTrackEntries';
+const TIMER_KEY = 'localTrackTimer';
 
-// Load state from storage
-chrome.storage.local.get(['timerState', 'entries'], (data) => {
-  if (data.timerState) {
-    state.running = data.timerState.running;
-    state.startTime = data.timerState.startTime;
-    state.elapsed = data.timerState.elapsed;
-    if (state.running) {
-      const now = Date.now();
-      const diff = now - state.startTime;
-      state.elapsed += diff;
-      state.startTime = now;
-      startTimerInterval();
+document.addEventListener('DOMContentLoaded', () => {
+  const startBtn = document.getElementById('startBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const timerDisplay = document.getElementById('timerDisplay');
+  const manualForm = document.getElementById('manualForm');
+  const entriesList = document.getElementById('entriesList');
+  const exportJsonBtn = document.getElementById('exportJson');
+  const exportCsvBtn = document.getElementById('exportCsv');
+  const clearBtn = document.getElementById('clearBtn');
+
+  let timerInterval = null;
+  let timerState = { status: 'stopped', startTime: null };
+
+  // Load timer state
+  chrome.storage.local.get(TIMER_KEY, (data) => {
+    if (data[TIMER_KEY]) {
+      timerState = data[TIMER_KEY];
+      if (timerState.status === 'running') {
+        startTimer();
+        startBtn.style.display = 'none';
+        pauseBtn.style.display = 'inline';
+        stopBtn.style.display = 'inline';
+      } else {
+        resetTimerUI();
+      }
     }
+  });
+
+  function startTimer() {
+    const now = Date.now();
+    if (timerState.status === 'stopped' || timerState.status === 'paused') {
+      timerState.startTime = now;
+      timerState.status = 'running';
+    }
+    saveTimerState();
+    updateTimerDisplay();
+    timerInterval = setInterval(updateTimerDisplay, 1000);
   }
-  renderEntries(data.entries || []);
-});
 
-function saveState() {
-  chrome.storage.local.set({ timerState: state });
-}
+  function pauseTimer() {
+    clearInterval(timerInterval);
+    timerState.status = 'paused';
+    saveTimerState();
+    startBtn.style.display = 'inline';
+    pauseBtn.style.display = 'none';
+    stopBtn.style.display = 'none';
+  }
 
-function startTimerInterval() {
-  if (state.intervalId) clearInterval(state.intervalId);
-  state.intervalId = setInterval(() => {
-    state.elapsed += 1000;
-    updateTimerDisplay();
-  }, 1000);
-  updateTimerDisplay();
-}
+  function stopTimer() {
+    clearInterval(timerInterval);
+    const endTime = Date.now();
+    const durationMs = endTime - timerState.startTime;
+    const durationSec = durationMs / 1000;
 
-function updateTimerDisplay() {
-  const totalMs = state.elapsed;
-  const h = Math.floor(totalMs / 3600000);
-  const m = Math.floor((totalMs % 3600000) / 60000);
-  const s = Math.floor((totalMs % 60000) / 1000);
-  document.getElementById('timer-display').textContent = 
-    `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-}
+    const entry = {
+      id: Date.now(),
+      project: 'Timer',
+      date: new Date().toISOString().split('T')[0],
+      startTime: new Date(timerState.startTime).toISOString(),
+      endTime: new Date(endTime).toISOString(),
+      duration: durationSec,
+      notes: ''
+    };
 
-document.getElementById('start-btn').addEventListener('click', () => {
-  state.running = true;
-  state.startTime = Date.now();
-  saveState();
-  startTimerInterval();
-});
+    saveEntry(entry);
+    timerState.status = 'stopped';
+    saveTimerState();
+    resetTimerUI();
+  }
 
-document.getElementById('pause-btn').addEventListener('click', () => {
-  state.running = false;
-  saveState();
-  if (state.intervalId) clearInterval(state.intervalId);
-});
+  function resetTimerUI() {
+    clearInterval(timerInterval);
+    timerDisplay.textContent = '00:00:00';
+    startBtn.style.display = 'inline';
+    pauseBtn.style.display = 'none';
+    stopBtn.style.display = 'none';
+  }
 
-document.getElementById('stop-btn').addEventListener('click', () => {
-  state.running = false;
-  if (state.intervalId) clearInterval(state.intervalId);
-  const entry = {
-    id: Date.now(),
-    project: 'Timer',
-    date: new Date().toISOString().split('T')[0],
-    startTime: new Date(state.startTime).toISOString(),
-    endTime: new Date().toISOString(),
-    duration: state.elapsed,
-    notes: 'Timer session'
-  };
-  chrome.storage.local.get(['entries'], (data) => {
-    const entries = data.entries || [];
-    entries.push(entry);
-    chrome.storage.local.set({ entries });
-    renderEntries(entries);
+  function updateTimerDisplay() {
+    const now = Date.now();
+    const elapsed = now - timerState.startTime;
+    const date = new Date(elapsed);
+    const h = date.getUTCHours();
+    const m = date.getUTCMinutes();
+    const s = date.getUTCSeconds();
+    timerDisplay.textContent = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+
+  function saveTimerState() {
+    chrome.storage.local.set({ [TIMER_KEY]: timerState });
+  }
+
+  function saveEntry(entry) {
+    chrome.storage.local.get(STORAGE_KEY, (data) => {
+      const entries = data[STORAGE_KEY] || [];
+      entries.push(entry);
+      chrome.storage.local.set({ [STORAGE_KEY]: entries }, () => {
+        loadEntries();
+      });
+    });
+  }
+
+  function loadEntries() {
+    chrome.storage.local.get(STORAGE_KEY, (data) => {
+      const entries = data[STORAGE_KEY] || [];
+      entriesList.innerHTML = '';
+      entries.forEach(entry => {
+        const div = document.createElement('div');
+        div.className = 'entry-item';
+        div.textContent = `${entry.project} - ${entry.duration}s`;
+        entriesList.appendChild(div);
+      });
+    });
+  }
+
+  // Event listeners
+  startBtn.addEventListener('click', () => {
+    startTimer();
+    startBtn.style.display = 'none';
+    pauseBtn.style.display = 'inline';
+    stopBtn.style.display = 'inline';
   });
-  state.elapsed = 0;
-  state.startTime = null;
-  updateTimerDisplay();
-  saveState();
-});
 
-// Manual Entry
-document.getElementById('manual-form').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const project = document.getElementById('project-name').value;
-  const date = document.getElementById('entry-date').value;
-  const durationStr = document.getElementById('duration').value;
-  const notes = document.getElementById('notes').value;
-  
-  const [h, m] = durationStr.split(':').map(Number);
-  const durationMs = (h || 0) * 60 * 60 * 1000 + (m || 0) * 60 * 1000;
-  
-  const entry = {
-    id: Date.now(),
-    project,
-    date,
-    startTime: null,
-    endTime: null,
-    duration: durationMs,
-    notes
-  };
-  
-  chrome.storage.local.get(['entries'], (data) => {
-    const entries = data.entries || [];
-    entries.push(entry);
-    chrome.storage.local.set({ entries });
-    renderEntries(entries);
-  });
-});
+  pauseBtn.addEventListener('click', pauseTimer);
+  stopBtn.addEventListener('click', stopTimer);
 
-function renderEntries(entries) {
-  const list = document.getElementById('entries-list');
-  list.innerHTML = '';
-  const recent = entries.slice(-5).reverse();
-  recent.forEach(e => {
-    const li = document.createElement('li');
-    li.textContent = `${e.project} (${e.date}) - ${(e.duration / 60000).toFixed(2)}m`;
-    list.appendChild(li);
-  });
-}
+  manualForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const project = document.getElementById('project').value;
+    const date = document.getElementById('date').value;
+    const hours = parseInt(document.getElementById('hours').value) || 0;
+    const minutes = parseInt(document.getElementById('minutes').value) || 0;
+    const notes = document.getElementById('notes').value;
 
-// Export
-document.getElementById('export-json').addEventListener('click', () => {
-  chrome.storage.local.get(['entries'], (data) => {
-    const blob = new Blob([JSON.stringify(data.entries, null, 2)]);
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'localtrack-export.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    const duration = hours * 3600 + minutes * 60;
+    const entry = {
+      id: Date.now(),
+      project,
+      date,
+      startTime: null,
+      endTime: null,
+      duration,
+      notes
+    };
+    saveEntry(entry);
+    manualForm.reset();
   });
-});
 
-document.getElementById('export-csv').addEventListener('click', () => {
-  chrome.storage.local.get(['entries'], (data) => {
-    const entries = data.entries || [];
-    const csv = entries.map(e => 
-      `${e.project},${e.date},${(e.duration/60000).toFixed(2)},"${e.notes}"`
-    ).join('\n');
-    const header = 'Project,Date,Duration (min),Notes\n';
-    const blob = new Blob([header + csv]);
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'localtrack-export.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  exportJsonBtn.addEventListener('click', () => {
+    chrome.storage.local.get(STORAGE_KEY, (data) => {
+      const entries = data[STORAGE_KEY] || [];
+      const blob = new Blob([JSON.stringify(entries, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'localtrack_entries.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
   });
-});
 
-// Clear Data
-document.getElementById('clear-data').addEventListener('click', () => {
-  chrome.storage.local.clear(() => {
-    renderEntries([]);
-    state.elapsed = 0;
-    state.startTime = null;
-    state.running = false;
-    updateTimerDisplay();
+  exportCsvBtn.addEventListener('click', () => {
+    chrome.storage.local.get(STORAGE_KEY, (data) => {
+      const entries = data[STORAGE_KEY] || [];
+      const csv = entries.map(e => `${e.project},${e.date},${e.duration},${e.notes}`).join('\n');
+      const header = 'Project,Date,Duration(seconds),Notes\n';
+      const blob = new Blob([header + csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'localtrack_entries.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
   });
+
+  clearBtn.addEventListener('click', () => {
+    chrome.storage.local.clear(() => {
+      timerState = { status: 'stopped', startTime: null };
+      saveTimerState();
+      loadEntries();
+      resetTimerUI();
+    });
+  });
+
+  loadEntries();
 });
