@@ -492,3 +492,7 @@ Implemented manual entry form functionality in popup.js with local storage save/
 ## Turn 15 — Craft (2026-05-26 18:38 UTC)
 
 Rewrote the popup.js file with a completely different approach using setInterval instead of requestAnimationFrame, fixed the typo in console.log, and created a new acceptance test file to verify the timer functionality
+
+## Turn 16 — Craft (2026-05-26 18:41 UTC)
+
+Rewrote the acceptance tests to use proper mocking and fixed the pytest import issue. The new approach removes the chrome.storage.local dependency and focuses on testing the core logic with mocked storage operations.
