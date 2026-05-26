@@ -249,3 +249,7 @@ Starting new project: ios-app-time-tracker. Created project.json, README.md, and
 ## Turn 12 — Manager (2026-05-26 15:14 UTC)
 
 
+
+## Turn 13 — Manager (2026-05-26 15:15 UTC)
+
+Resuming the 'TimeTracker' project by updating its project.json to set status='active' and adding 3 meetings to the budget. This aligns with the idea queue request for an iOS app using SwiftUI and SwiftData with Jira integration features.

@@ -1,57 +1,52 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LocalTrack</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1>LocalTrack</h1>
-      <div id="status">Stopped</div>
-    </header>
+    <h1>LocalTrack</h1>
     
-    <div class="timer-display">
-      <span id="timer">00:00:00</span>
+    <!-- Timer Section -->
+    <div class="timer-section">
+      <div id="time-display">00:00:00</div>
+      <div class="timer-controls">
+        <button id="start-btn">Start</button>
+        <button id="pause-btn">Pause</button>
+        <button id="stop-btn">Stop</button>
+      </div>
     </div>
 
-    <div class="controls">
-      <button id="start">Start</button>
-      <button id="pause">Pause</button>
-      <button id="stop">Stop</button>
-    </div>
-
-    <div class="manual-entry">
+    <!-- Manual Entry Form -->
+    <div class="manual-entry-section">
       <h2>Manual Entry</h2>
       <form id="entry-form">
-        <label>Project Name:</label>
-        <input type="text" id="project-name" required>
-        <label>Date:</label>
+        <input type="text" id="project-name" placeholder="Project Name" required>
         <input type="date" id="entry-date" required>
-        <label>Duration:</label>
-        <div class="duration">
-          <input type="number" id="hours" placeholder="Hours">
-          <input type="number" id="minutes" placeholder="Minutes">
+        <div class="duration-inputs">
+          <input type="number" id="hours" placeholder="Hours" min="0" max="23">
+          <input type="number" id="minutes" placeholder="Minutes" min="0" max="59">
         </div>
-        <label>Notes:</label>
-        <textarea id="notes" rows="2"></textarea>
+        <textarea id="notes" placeholder="Notes (optional)"></textarea>
         <button type="submit">Save Entry</button>
       </form>
     </div>
 
-    <div class="entries">
-      <h2>Recent Entries</h2>
-      <ul id="entries-list"></ul>
+    <!-- Summary and Entries -->
+    <div class="summary-section">
+      <h2>Today's Summary</h2>
+      <p id="today-summary">Total: 0 hours 0 minutes</p>
     </div>
 
-    <div class="actions">
-      <button id="export-json">Export JSON</button>
-      <button id="export-csv">Export CSV</button>
-      <button id="clear-storage">Clear Data</button>
+    <div class="entries-section">
+      <h2>Recent Entries</h2>
+      <div id="entries-list"></div>
+      <button id="export-btn">Export Data</button>
+      <button id="clear-btn">Clear All Data</button>
     </div>
+
+    <script src="popup.js"></script>
   </div>
-  <script src="popup.js"></script>
 </body>
 </html>
