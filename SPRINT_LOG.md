@@ -241,3 +241,11 @@ Created missing Swift files and acceptance_tests.py. Tests verify file presence 
 ## Turn 7 — Craft (2026-05-26 14:46 UTC)
 
 
+
+## Turn 8 — Manager (2026-05-26 14:48 UTC)
+
+Starting new project: ios-app-time-tracker. Created project.json, README.md, and acceptance_tests.py with an 8-meeting budget. Focused on SwiftUI, SwiftData persistence, and URLSession for Jira integration. Next steps will involve implementing SwiftData models and the Settings view.
+
+## Turn 12 — Manager (2026-05-26 15:14 UTC)
+
+
