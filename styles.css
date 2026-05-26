@@ -1,16 +1,15 @@
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  margin: 0;
-  padding: 10px;
-  background-color: #f9f9f9;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  width: 300px;
+  padding: 20px;
+  background-color: #f4f4f4;
   color: #333;
 }
 
 .container {
-  max-width: 300px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
 }
 
 h1, h2 {
@@ -18,72 +17,78 @@ h1, h2 {
   text-align: center;
 }
 
+.timer-section {
+  text-align: center;
+  padding: 15px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
 #timer-display {
   font-size: 2em;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-  margin: 10px 0;
+  font-weight: bold;
+  margin-bottom: 10px;
 }
 
-#timer-controls, #controls {
-  display: flex;
-  gap: 5px;
-  justify-content: center;
-}
-
-button {
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  background-color: #fff;
+.timer-controls button {
+  margin: 0 5px;
+  padding: 5px 10px;
   cursor: pointer;
-  border-radius: 4px;
 }
 
-button:hover {
-  background-color: #eee;
+.manual-entry {
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
 }
 
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.manual-entry input, .manual-entry textarea {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 5px;
+  box-sizing: border-box;
 }
 
-#manual-entry {
+.duration-inputs {
   display: flex;
-  flex-direction: column;
   gap: 5px;
 }
 
-#manual-entry label {
+.export-section {
   display: flex;
-  flex-direction: column;
+  gap: 5px;
+}
+
+.export-section button {
+  flex: 1;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.history-section {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+#entry-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
   font-size: 0.9em;
 }
 
-#manual-entry input, #manual-entry textarea {
-  padding: 4px;
-  margin-top: 2px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+#entry-list li {
+  border-bottom: 1px solid #ddd;
+  padding: 5px 0;
 }
 
-#entries-list {
-  max-height: 150px;
-  overflow-y: auto;
-  border: 1px solid #ccc;
+#clear-storage {
+  background: #ff4d4d;
+  color: white;
+  border: none;
   padding: 5px;
-}
-
-#entries {
-  margin: 0;
-  padding-left: 20px;
-}
-
-@media (max-width: 320px) {
-  .container {
-    max-width: 100%;
-  }
-  #timer-display {
-    font-size: 1.5em;
-  }
+  cursor: pointer;
+  margin-top: 10px;
 }

@@ -1,21 +1,24 @@
 # LocalTrack Browser Extension
 
 ## Goal
-Build a privacy-first, local-only Browser Extension called 'LocalTrack' for tracking project time. The extension must operate entirely offline with zero cloud dependency, accounts, or telemetry.
+Build a privacy-first, local-only Browser Extension for tracking project time. Operates entirely offline with zero cloud dependency.
 
-## Status
-COMPLETE. All acceptance criteria verified and passing. Budget exhausted.
+## Tech Stack
+- Vanilla JS
+- HTML/CSS
+- Manifest V3
 
-## Completed Work
-- Implemented MV3 manifest.
-- Built popup UI with timer and manual entry.
-- Implemented background service worker for timer persistence.
-- Added local storage integration.
-- Added export functionality.
-- Created acceptance tests.
+## Files
+- manifest.json: Extension configuration.
+- index.html: Main popup UI.
+- popup.js: Core UI logic, timer, storage, and export.
+- background.js: Service worker for persistent timer state.
+- styles.css: UI styling.
 
-## Known Bugs
-- None.
-
-## Next Steps
-- Project closed. Ready for new project.
+## Acceptance Criteria
+1. Extension installs and launches without errors.
+2. Timer persists across popup close/open.
+3. Manual entries save and retrieve correctly.
+4. Export generates valid files.
+5. No network requests.
+6. UI is responsive.
