@@ -396,3 +396,7 @@ Rewrote the iOS Swift package to fix git ownership issues and simplified the imp
 ## Turn 24 — Craft (2026-05-26 18:02 UTC)
 
 Rewrote the iOS package manifest to fix compilation issues by correcting the Swift tools version and package structure. The previous attempt failed due to invalid manifest syntax. This version properly defines a library product with correct dependencies and target configuration.
+
+## Turn 1 — Manager (2026-05-26 18:05 UTC)
+
+The tests are failing because the acceptance_tests.py file doesn't exist in the project directory. I need to create this file first before running tests, as it's required for defining the definition of done. The test runner looks for this specific file to validate completion criteria.
