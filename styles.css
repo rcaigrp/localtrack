@@ -1,50 +1,38 @@
 body {
-  font-family: sans-serif;
-  margin: 0;
-  padding: 10px;
-  width: 300px;
+    font-family: sans-serif;
+    width: 300px;
+    padding: 10px;
 }
-#app {
-  display: flex;
-  flex-direction: column;
-}
-header {
-  text-align: center;
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 #timer-display {
-  font-size: 2em;
-  margin: 10px 0;
+    font-size: 2em;
+    text-align: center;
 }
-#timer-controls button {
-  margin: 5px;
+.controls button {
+    margin: 2px;
+    width: 30%;
 }
-#manual-entry {
-  margin: 10px 0;
+form label {
+    display: block;
+    margin-top: 5px;
 }
-#entry-form {
-  display: flex;
-  flex-direction: column;
+form input, form textarea {
+    width: 100%;
+    box-sizing: border-box;
 }
-#entry-form input, #entry-form textarea {
-  margin: 5px 0;
-  width: 100%;
+.entry {
+    border-bottom: 1px solid #ccc;
+    padding: 5px 0;
 }
-#entries {
-  margin-top: 10px;
-}
-#entries-list {
-  list-style: none;
-  padding: 0;
-}
-#entries-list li {
-  border-bottom: 1px solid #ccc;
-  padding: 5px 0;
-}
-#export-controls {
-  display: flex;
-  gap: 5px;
-  margin-top: 10px;
-}
-#export-controls button {
-  flex: 1;
+#export-btn {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
 }

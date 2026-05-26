@@ -1,47 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LocalTrack</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LocalTrack</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="app">
-    <header>
-      <h1>LocalTrack</h1>
-      <div id="timer-display">00:00:00</div>
-      <div id="timer-controls">
-        <button id="start-btn">Start</button>
-        <button id="pause-btn" disabled>Pause</button>
-        <button id="stop-btn" disabled>Stop</button>
-      </div>
-    </header>
-    <section id="manual-entry">
-      <h2>Manual Entry</h2>
-      <form id="entry-form">
-        <label for="project">Project:</label>
-        <input type="text" id="project" required>
-        <label for="date">Date:</label>
-        <input type="date" id="date" required>
-        <label for="duration">Duration (min):</label>
-        <input type="number" id="duration" min="1" required>
-        <label for="notes">Notes:</label>
-        <textarea id="notes"></textarea>
-        <button type="submit">Save Entry</button>
-      </form>
-    </section>
-    <section id="entries">
-      <h2>Recent Entries</h2>
-      <ul id="entries-list"></ul>
-      <div id="summary">Total: 0h 0m</div>
-      <div id="export-controls">
-        <button id="export-json">Export JSON</button>
-        <button id="export-csv">Export CSV</button>
-        <button id="clear-storage">Clear Storage</button>
-      </div>
-    </section>
-  </div>
-  <script src="popup.js"></script>
+    <div class="container">
+        <h1>LocalTrack</h1>
+        <div id="timer-display">00:00:00</div>
+        <div class="controls">
+            <button id="start-btn">Start</button>
+            <button id="pause-btn" style="display:none;">Pause</button>
+            <button id="stop-btn" style="display:none;">Stop</button>
+        </div>
+        <hr>
+        <h2>Manual Entry</h2>
+        <form id="manual-form">
+            <label>Project:</label>
+            <input type="text" id="project" required>
+            <label>Date:</label>
+            <input type="date" id="date" required>
+            <label>Duration (h):</label>
+            <input type="number" id="duration" step="0.5" required>
+            <label>Notes:</label>
+            <textarea id="notes"></textarea>
+            <button type="submit">Save Entry</button>
+        </form>
+        <hr>
+        <div id="entries-list"></div>
+        <button id="export-btn">Export JSON</button>
+    </div>
+    <script src="popup.js"></script>
 </body>
 </html>

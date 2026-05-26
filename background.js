@@ -1,10 +1,18 @@
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.type === 'getTimerState') {
-    chrome.storage.local.get('timerState', (data) => {
-      sendResponse(data.timerState || null);
+// Service worker for persistent timer state
+// Note: Timer state is stored in chrome.storage.local to survive popup close.
+
+class TimerState {
+    constructor() {
+        this.running = false;
+        this.startTime = null;
+        this.elapsedTime = 0;
+    }
+}
+
+chrome.runtime.onInstalled.addListener(() => {
+    chrome.storage.local.get(['timerState', 'entries'], (data) => {
+        if (!data.timerState) {
+            chrome.storage.local.set({ timerState: new TimerState() });
+        }
     });
-    return true; // async response
-  } else if (request.type === 'setTimerState') {
-    chrome.storage.local.set({ timerState: request.timerState });
-  }
 });
