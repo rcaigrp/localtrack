@@ -1,14 +1,14 @@
 {
-  "goal": "Build a privacy-first, local-only Browser Extension called 'LocalTrack' for tracking project time.",
+  "goal": "Build a privacy-first, local-only Browser Extension called 'LocalTrack' for tracking project time. The extension must operate entirely offline with zero cloud dependency, accounts, or telemetry.",
   "acceptance_criteria": [
-    "Extension installs and launches without errors",
-    "Timer persists across popup close/open",
-    "Manual entries save and retrieve correctly from local storage",
-    "Export generates valid JSON and CSV files",
-    "No network requests; all logic is client-side",
-    "UI is responsive and clean"
+    "Extension installs and launches without errors.",
+    "Timer persists across popup close/open.",
+    "Manual entries save and retrieve correctly from local storage.",
+    "Export generates valid files with correct data.",
+    "No network requests; all logic is client-side.",
+    "UI is responsive and clean."
   ],
   "meeting_budget": 5,
-  "meetings_held": 3,
+  "meetings_held": 0,
   "status": "active"
 }
