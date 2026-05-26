@@ -257,3 +257,7 @@ Resuming the 'TimeTracker' project by updating its project.json to set status='a
 ## Turn 19 — Craft (2026-05-26 17:47 UTC)
 
 Completely rewrote the iOS app to use a SwiftUI view instead of UIKit, which resolves the 'no such module UIKit' error. Also updated the Package.swift to properly include SwiftUI and fixed build settings for iOS platform.
+
+## Turn 20 — Craft (2026-05-26 17:51 UTC)
+
+Rewrote the iOS Swift package to fix git ownership issues and simplified the implementation to focus on core timer functionality without external dependencies
