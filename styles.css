@@ -1,62 +1,10 @@
-body {
-  font-family: sans-serif;
-  margin: 0;
-  padding: 10px;
-  width: 300px;
-  background-color: #f0f0f0;
-}
-
-#app {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-h1, h3 {
-  margin: 0 0 10px 0;
-}
-
-#timer-display {
-  font-size: 2em;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-#controls button {
-  margin: 5px;
-  padding: 5px 10px;
-}
-
-#manual-form {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-#manual-form input, #manual-form textarea {
-  margin-bottom: 5px;
-  padding: 5px;
-}
-
-#entry-list {
-  list-style: none;
-  padding: 0;
-  width: 100%;
-}
-
-#entry-list li {
-  background: #fff;
-  margin-bottom: 5px;
-  padding: 5px;
-  border: 1px solid #ccc;
-}
-
-#export-buttons {
-  display: flex;
-  gap: 5px;
-  margin-top: 10px;
-}
-
-#export-buttons button {
-  flex: 1;
-}
+body { font-family: sans-serif; margin: 0; padding: 10px; width: 300px; }
+.container { max-width: 300px; }
+.timer { font-size: 24px; text-align: center; margin: 10px 0; }
+.controls button { margin: 5px; }
+form { margin: 10px 0; }
+form input, form textarea { width: 100%; margin-bottom: 5px; }
+#todaySummary { margin: 10px 0; font-weight: bold; }
+#entriesList { list-style: none; padding: 0; }
+#entriesList li { margin: 5px 0; border-bottom: 1px solid #ccc; }
+#export { width: 100%; margin-top: 10px; }

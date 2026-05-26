@@ -7,34 +7,30 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="app">
+  <div class="container">
     <h1>LocalTrack</h1>
-    <div id="timer-display">00:00:00</div>
-    <div id="controls">
-      <button id="start-btn">Start</button>
-      <button id="pause-btn" disabled>Pause</button>
-      <button id="stop-btn" disabled>Stop</button>
+    <div id="timer" class="timer">00:00:00</div>
+    <div class="controls">
+      <button id="start">Start</button>
+      <button id="pause" disabled>Pause</button>
+      <button id="stop" disabled>Stop</button>
     </div>
-    <div id="manual-entry">
-      <h3>Manual Entry</h3>
-      <form id="manual-form">
-        <input type="text" id="project-name" placeholder="Project Name" required>
-        <input type="date" id="entry-date" required>
-        <input type="number" id="duration-hours" placeholder="Hours" min="0">
-        <input type="number" id="duration-minutes" placeholder="Minutes" min="0" max="59">
-        <textarea id="notes" placeholder="Notes (optional)"></textarea>
-        <button type="submit" id="save-entry-btn">Save Entry</button>
-      </form>
-    </div>
-    <div id="entries">
-      <h3>Recent Entries</h3>
-      <ul id="entry-list"></ul>
-      <div id="export-buttons">
-        <button id="export-json-btn">Export JSON</button>
-        <button id="export-csv-btn">Export CSV</button>
-        <button id="clear-storage-btn">Clear Data</button>
-      </div>
-    </div>
+    <h2>Manual Entry</h2>
+    <form id="manualForm">
+      <label>Project:</label>
+      <input type="text" id="project" required>
+      <label>Date:</label>
+      <input type="date" id="date" required>
+      <label>Duration (HH:MM):</label>
+      <input type="text" id="duration" required>
+      <label>Notes:</label>
+      <textarea id="notes"></textarea>
+      <button type="submit">Add Entry</button>
+    </form>
+    <div id="todaySummary"></div>
+    <h2>Recent Entries</h2>
+    <ul id="entriesList"></ul>
+    <button id="export">Export JSON & CSV</button>
   </div>
   <script src="popup.js"></script>
 </body>
