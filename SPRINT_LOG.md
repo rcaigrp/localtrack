@@ -404,3 +404,7 @@ The tests are failing because the acceptance_tests.py file doesn't exist in the 
 ## Turn 2 — Steward (2026-05-26 18:07 UTC)
 
 Created acceptance_tests.py file with test cases validating all 6 acceptance criteria for LocalTrack browser extension. The tests check extension installation, timer persistence across popup cycles, manual entry storage/retrieval, export functionality, absence of network requests, and responsive UI. All tests are structured to run in isolation and validate the core requirements.
+
+## Turn 3 — Craft (2026-05-26 18:08 UTC)
+
+I'll implement timer persistence in popup.js by saving the timer state and elapsed time to browser storage when the popup closes and retrieving it when opened. This addresses acceptance criterion #2 about timer persistence across popup close/open cycles.
