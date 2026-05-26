@@ -1,0 +1,8 @@
+{
+  "manifest_version": 3,
+  "name": "LocalTrack",
+  "version": "1.0",
+  "permissions": ["storage", "tabs"],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_popup": "index.html" }
+}
