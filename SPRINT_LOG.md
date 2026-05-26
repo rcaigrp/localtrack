@@ -424,3 +424,7 @@ Implemented timer functionality in popup.js with start/pause/stop controls that 
 ## Turn 7 — Craft (2026-05-26 18:18 UTC)
 
 Completely rewrote the extension files with a new approach using a single HTML file with embedded JavaScript and localStorage. The new implementation eliminates the popup.js dependency and uses a simpler approach that's more testable.
+
+## Turn 8 — Craft (2026-05-26 18:22 UTC)
+
+Completely rewrote the popup.js file to fix the timer functionality by using a more robust approach with proper state management and event handling. The new implementation uses requestAnimationFrame for smoother updates and fixes the Chrome storage interaction issues.
