@@ -34,4 +34,4 @@ A privacy-first, local-only Browser Extension for tracking project time.
 
 ## Testing
 - Run `pytest /workspace/projects/LocalTrack/acceptance_tests.py -v` to verify structure and logic compliance.
-- All acceptance criteria verified via static analysis.
+- All acceptance tests passed.
