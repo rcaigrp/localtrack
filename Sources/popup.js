@@ -1,92 +1,60 @@
-const timerDisplay = document.getElementById('timer');
-const startButton = document.getElementById('start');
-const pauseButton = document.getElementById('pause');
-const stopButton = document.getElementById('stop');
-const saveEntryButton = document.getElementById('saveEntry');
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('entryForm');
+  const projectInput = document.getElementById('projectName');
+  const timeInput = document.getElementById('timeSpent');
+  const saveBtn = document.getElementById('saveEntry');
+  const entriesList = document.getElementById('entriesList');
 
-let startTime = 0;
-let elapsedTime = 0;
-let timerInterval = null;
-let isRunning = false;
+  // Load saved entries on popup open
+  loadEntries();
 
-// Save timer state to storage
-function saveTimerState() {
-    const timerData = {
-        isRunning: isRunning,
-        elapsedTime: elapsedTime,
-        startTime: startTime
-    };
-    chrome.storage.local.set({timerData: timerData});
-}
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const project = projectInput.value.trim();
+    const time = timeInput.value.trim();
 
-// Restore timer state from storage
-function restoreTimerState() {
-    return new Promise((resolve) => {
-        chrome.storage.local.get(['timerData'], (result) => {
-            if (result.timerData) {
-                const timerData = result.timerData;
-                isRunning = timerData.isRunning;
-                elapsedTime = timerData.elapsedTime;
-                startTime = timerData.startTime;
-                
-                // Update display with restored time
-                updateDisplay();
-                
-                if (isRunning) {
-                    startTimer();
-                }
-            }
-            resolve();
-        });
+    if (project && time) {
+      saveEntry(project, time);
+      projectInput.value = '';
+      timeInput.value = '';
+      loadEntries(); // Refresh display after saving
+    }
+  });
+
+  function saveEntry(project, time) {
+    chrome.storage.local.get(['entries'], function(result) {
+      const entries = result.entries || [];
+      const newEntry = {
+        project: project,
+        time: time,
+        timestamp: Date.now()
+      };
+      entries.push(newEntry);
+      chrome.storage.local.set({entries: entries});
     });
-}
+  }
 
-function updateDisplay() {
-    const hours = Math.floor(elapsedTime / 3600000);
-    const minutes = Math.floor((elapsedTime % 3600000) / 60000);
-    const seconds = Math.floor((elapsedTime % 60000) / 1000);
+  function loadEntries() {
+    chrome.storage.local.get(['entries'], function(result) {
+      const entries = result.entries || [];
+      displayEntries(entries);
+    });
+  }
+
+  function displayEntries(entries) {
+    entriesList.innerHTML = '';
+    if (entries.length === 0) {
+      entriesList.innerHTML = '<li>No entries yet</li>';
+      return;
+    }
     
-    timerDisplay.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-}
-
-function startTimer() {
-    if (!isRunning) {
-        isRunning = true;
-        startTime = Date.now() - elapsedTime;
-        
-        timerInterval = setInterval(() => {
-            elapsedTime = Date.now() - startTime;
-            updateDisplay();
-        }, 1000);
-        
-        saveTimerState();
-    }
-}
-
-function pauseTimer() {
-    if (isRunning) {
-        isRunning = false;
-        clearInterval(timerInterval);
-        saveTimerState();
-    }
-}
-
-function stopTimer() {
-    isRunning = false;
-    clearInterval(timerInterval);
-    elapsedTime = 0;
-    updateDisplay();
-    saveTimerState();
-}
-
-// Initialize timer state on popup open
-restoreTimerState().then(() => {
-    // Timer state restored, UI ready
+    // Sort by timestamp descending (newest first)
+    entries.sort((a, b) => b.timestamp - a.timestamp);
+    
+    entries.forEach(entry => {
+      const li = document.createElement('li');
+      li.innerHTML = `<strong>${entry.project}</strong> - ${entry.time} hours`;
+      entriesList.appendChild(li);
+    });
+  }
 });
-
-startButton.addEventListener('click', startTimer);
-pauseButton.addEventListener('click', pauseTimer);
-stopButton.addEventListener('click', stopTimer);
-
-// Save state when popup closes (using pagehide event)
-window.addEventListener('pagehide', saveTimerState);

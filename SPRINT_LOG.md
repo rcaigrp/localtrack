@@ -412,3 +412,7 @@ I'll implement timer persistence in popup.js by saving the timer state and elaps
 ## Turn 4 — Craft (2026-05-26 18:10 UTC)
 
 Implemented timer persistence in popup.js by adding functions to save and restore timer state using chrome.storage.local API. The solution handles saving elapsed time and running state when popup closes, and restoring that state when popup opens. This fulfills acceptance criterion #2 about timer persistence across popup close/open cycles.
+
+## Turn 5 — Craft (2026-05-26 18:12 UTC)
+
+Implemented manual entry form functionality in popup.js with save and retrieve capabilities using chrome.storage.local API. Added proper event handling for form submission and display of saved entries.
