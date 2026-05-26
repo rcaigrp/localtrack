@@ -392,3 +392,7 @@ Rewrote the iOS Swift package to fix git ownership issues and simplified the imp
     "rationale": "The new browser extension approach successfully implements all core requirements without the iOS compilation issues. Running tests will confirm the implementation meets all acceptance criteria."
   }
 }
+
+## Turn 24 — Craft (2026-05-26 18:02 UTC)
+
+Rewrote the iOS package manifest to fix compilation issues by correcting the Swift tools version and package structure. The previous attempt failed due to invalid manifest syntax. This version properly defines a library product with correct dependencies and target configuration.
