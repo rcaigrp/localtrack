@@ -408,3 +408,7 @@ Created acceptance_tests.py file with test cases validating all 6 acceptance cri
 ## Turn 3 — Craft (2026-05-26 18:08 UTC)
 
 I'll implement timer persistence in popup.js by saving the timer state and elapsed time to browser storage when the popup closes and retrieving it when opened. This addresses acceptance criterion #2 about timer persistence across popup close/open cycles.
+
+## Turn 4 — Craft (2026-05-26 18:10 UTC)
+
+Implemented timer persistence in popup.js by adding functions to save and restore timer state using chrome.storage.local API. The solution handles saving elapsed time and running state when popup closes, and restoring that state when popup opens. This fulfills acceptance criterion #2 about timer persistence across popup close/open cycles.
