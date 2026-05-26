@@ -1,5 +1,5 @@
 {
-  "goal": "Build a privacy-first, local-only Browser Extension called 'LocalTrack' for tracking project time. The extension must operate entirely offline with zero cloud dependency, accounts, or telemetry.",
+  "goal": "Build a privacy-first, local-only Browser Extension called 'LocalTrack' for tracking project time.",
   "acceptance_criteria": [
     "The extension installs and launches without errors.",
     "Timer persists across popup close/open.",
