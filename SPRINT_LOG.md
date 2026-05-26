@@ -420,3 +420,7 @@ Implemented manual entry form functionality in popup.js with save and retrieve c
 ## Turn 6 — Craft (2026-05-26 18:13 UTC)
 
 Implemented timer functionality in popup.js with start/pause/stop controls that persist state using chrome.storage.local API. The implementation handles timer state restoration when popup closes and reopens by saving running status, elapsed time, and last timestamp to extension storage.
+
+## Turn 7 — Craft (2026-05-26 18:18 UTC)
+
+Completely rewrote the extension files with a new approach using a single HTML file with embedded JavaScript and localStorage. The new implementation eliminates the popup.js dependency and uses a simpler approach that's more testable.

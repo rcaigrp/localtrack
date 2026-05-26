@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { width: 300px; padding: 10px; font-family: Arial, sans-serif; }
+    input, textarea, button { width: 100%; margin: 5px 0; padding: 5px; }
+    ul { list-style-type: none; padding: 0; }
+    li { border-bottom: 1px solid #eee; padding: 5px 0; }
+  </style>
+</head>
+<body>
+  <h2>LocalTrack</h2>
+  
+  <form id="entryForm">
+    <input type="text" id="projectInput" placeholder="Project" required>
+    <textarea id="descriptionInput" placeholder="Description"></textarea>
+    <input type="number" id="timeInput" placeholder="Time (minutes)" min="1" required>
+    <button type="submit">Add Entry</button>
+  </form>
+  
+  <h3>Entries:</h3>
+  <ul id="entriesList"></ul>
+  
+  <script>
+    // Load existing entries on popup open
+    function loadEntries() {
+      const entries = JSON.parse(localStorage.getItem('entries') || '[]');
+      displayEntries(entries);
+    }
+
+    // Display entries in the list
+    function displayEntries(entries) {
+      const entriesList = document.getElementById('entriesList');
+      entriesList.innerHTML = '';
+      
+      entries.forEach(entry => {
+        const li = document.createElement('li');
+        li.textContent = `${entry.project} - ${entry.description} (${entry.time} min)`;
+        entriesList.appendChild(li);
+      });
+    }
+
+    // Save entry to storage
+    function saveEntry(entry) {
+      const entries = JSON.parse(localStorage.getItem('entries') || '[]');
+      entries.push(entry);
+      localStorage.setItem('entries', JSON.stringify(entries));
+      displayEntries(entries);
+    }
+
+    // Handle form submission
+    document.getElementById('entryForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const project = document.getElementById('projectInput').value.trim();
+      const description = document.getElementById('descriptionInput').value.trim();
+      const time = parseInt(document.getElementById('timeInput').value);
+      
+      if (project && !isNaN(time) && time > 0) {
+        const newEntry = {
+          project: project,
+          description: description,
+          time: time,
+          timestamp: Date.now()
+        };
+        
+        saveEntry(newEntry);
+        
+        // Clear form
+        document.getElementById('projectInput').value = '';
+        document.getElementById('descriptionInput').value = '';
+        document.getElementById('timeInput').value = '';
+      }
+    });
+
+    // Load entries when popup opens
+    loadEntries();
+  </script>
+</body>
+</html>
