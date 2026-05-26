@@ -5,7 +5,7 @@ A privacy-first, local-only Browser Extension for tracking project time.
 ## Sprint Status
 - **Goal**: Build a privacy-first, local-only Browser Extension called 'LocalTrack' for tracking project time.
 - **Status**: Active
-- **Meetings**: 3/5 (2 remaining)
+- **Meetings**: 4/5 (1 remaining)
 - **Acceptance Criteria**: 6 total
 
 ## Features
