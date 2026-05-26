@@ -9,28 +9,32 @@
 <body>
   <div class="container">
     <h1>LocalTrack</h1>
-    <div id="timer" class="timer">00:00:00</div>
-    <div class="controls">
+    <div id="timer-display">00:00:00</div>
+    <div id="timer-controls">
       <button id="start">Start</button>
-      <button id="pause" disabled>Pause</button>
-      <button id="stop" disabled>Stop</button>
+      <button id="pause">Pause</button>
+      <button id="stop">Stop</button>
     </div>
-    <h2>Manual Entry</h2>
-    <form id="manualForm">
-      <label>Project:</label>
-      <input type="text" id="project" required>
-      <label>Date:</label>
-      <input type="date" id="date" required>
-      <label>Duration (HH:MM):</label>
-      <input type="text" id="duration" required>
-      <label>Notes:</label>
-      <textarea id="notes"></textarea>
-      <button type="submit">Add Entry</button>
-    </form>
-    <div id="todaySummary"></div>
-    <h2>Recent Entries</h2>
-    <ul id="entriesList"></ul>
-    <button id="export">Export JSON & CSV</button>
+    <div id="manual-entry">
+      <h2>Manual Entry</h2>
+      <form id="entry-form">
+        <label>Project Name: <input type="text" id="project" required></label>
+        <label>Date: <input type="date" id="date" required></label>
+        <label>Duration (h:): <input type="number" id="hours" min="0" step="1" placeholder="hours" required></label>
+        <label>(m): <input type="number" id="minutes" min="0" max="59" step="1" placeholder="minutes"></label>
+        <label>Notes: <textarea id="notes"></textarea></label>
+        <button type="submit">Save Entry</button>
+      </form>
+    </div>
+    <div id="entries-list">
+      <h2>Recent Entries</h2>
+      <ul id="entries"></ul>
+    </div>
+    <div id="controls">
+      <button id="export-json">Export JSON</button>
+      <button id="export-csv">Export CSV</button>
+      <button id="clear">Clear All</button>
+    </div>
   </div>
   <script src="popup.js"></script>
 </body>

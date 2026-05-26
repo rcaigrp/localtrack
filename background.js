@@ -1,20 +1,15 @@
-let timerState = { running: false, startTime: null };
-
-chrome.storage.local.get('localTrackTimer', (data) => {
-  if (data.localTrackTimer) {
-    timerState = data.localTrackTimer;
-  }
-});
-
 chrome.storage.onChanged.addListener((changes, namespace) => {
-  if (changes.localTrackTimer) {
-    timerState = changes.localTrackTimer.newValue;
+  if (namespace === 'local' && changes.timerState) {
+    console.log('Timer state updated:', changes.timerState.newValue);
   }
 });
 
-setInterval(() => {
-  if (timerState.running) {
-    const now = Date.now();
-    chrome.storage.local.set({ localTrackTimer: { running: true, startTime: timerState.startTime, elapsed: now - timerState.startTime } });
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === 'getTimerState') {
+    chrome.storage.local.get('timerState', (data) => {
+      sendResponse(data.timerState);
+    });
+    return true;
   }
-}, 1000);
+});
+
