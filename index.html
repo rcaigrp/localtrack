@@ -1,37 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LocalTrack</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LocalTrack</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>LocalTrack</h1>
-        <div id="timer-display">00:00:00</div>
-        <div class="controls">
-            <button id="start-btn">Start</button>
-            <button id="pause-btn" style="display:none;">Pause</button>
-            <button id="stop-btn" style="display:none;">Stop</button>
-        </div>
-        <hr>
-        <h2>Manual Entry</h2>
-        <form id="manual-form">
-            <label>Project:</label>
-            <input type="text" id="project" required>
-            <label>Date:</label>
-            <input type="date" id="date" required>
-            <label>Duration (h):</label>
-            <input type="number" id="duration" step="0.5" required>
-            <label>Notes:</label>
-            <textarea id="notes"></textarea>
-            <button type="submit">Save Entry</button>
-        </form>
-        <hr>
-        <div id="entries-list"></div>
-        <button id="export-btn">Export JSON</button>
+  <div class="container">
+    <h1>LocalTrack</h1>
+    <div id="timer-section">
+      <div id="timer-display">00:00:00</div>
+      <div class="controls">
+        <button id="start-btn">Start</button>
+        <button id="pause-btn" disabled>Pause</button>
+        <button id="stop-btn" disabled>Stop</button>
+      </div>
     </div>
-    <script src="popup.js"></script>
+    <div id="manual-entry">
+      <h2>Manual Entry</h2>
+      <form id="entry-form">
+        <label>Project Name: <input type="text" id="project-name" required></label>
+        <label>Date: <input type="date" id="entry-date" required></label>
+        <label>Duration: 
+          <input type="number" id="hours" min="0" max="24" step="0.5" placeholder="Hours">
+          <input type="number" id="minutes" min="0" max="59" step="1" placeholder="Min">
+        </label>
+        <label>Notes: <textarea id="notes"></textarea></label>
+        <button type="submit">Save Entry</button>
+      </form>
+    </div>
+    <div id="entries-section">
+      <h2>Recent Entries</h2>
+      <div id="today-summary"></div>
+      <ul id="entries-list"></ul>
+      <button id="clear-btn">Clear All</button>
+    </div>
+    <div id="export-section">
+      <button id="export-json">Export JSON</button>
+      <button id="export-csv">Export CSV</button>
+    </div>
+  </div>
+  <script src="popup.js"></script>
 </body>
 </html>
