@@ -400,3 +400,7 @@ Rewrote the iOS package manifest to fix compilation issues by correcting the Swi
 ## Turn 1 — Manager (2026-05-26 18:05 UTC)
 
 The tests are failing because the acceptance_tests.py file doesn't exist in the project directory. I need to create this file first before running tests, as it's required for defining the definition of done. The test runner looks for this specific file to validate completion criteria.
+
+## Turn 2 — Steward (2026-05-26 18:07 UTC)
+
+Created acceptance_tests.py file with test cases validating all 6 acceptance criteria for LocalTrack browser extension. The tests check extension installation, timer persistence across popup cycles, manual entry storage/retrieval, export functionality, absence of network requests, and responsive UI. All tests are structured to run in isolation and validate the core requirements.
