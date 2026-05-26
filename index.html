@@ -10,19 +10,31 @@
   <div id="app">
     <h1>LocalTrack</h1>
     <div id="timer-display">00:00:00</div>
-    <button id="start-btn">Start</button>
-    <button id="pause-btn">Pause</button>
-    <button id="stop-btn">Stop</button>
-    <h2>Manual Entry</h2>
-    <input type="text" id="project-name" placeholder="Project Name">
-    <input type="date" id="entry-date">
-    <input type="number" id="hours" placeholder="Hours">
-    <input type="number" id="minutes" placeholder="Minutes">
-    <textarea id="notes" placeholder="Notes"></textarea>
-    <button id="add-entry-btn">Add Entry</button>
-    <button id="export-json-btn">Export JSON</button>
-    <button id="export-csv-btn">Export CSV</button>
-    <ul id="entry-list"></ul>
+    <div id="controls">
+      <button id="start-btn">Start</button>
+      <button id="pause-btn" disabled>Pause</button>
+      <button id="stop-btn" disabled>Stop</button>
+    </div>
+    <div id="manual-entry">
+      <h3>Manual Entry</h3>
+      <form id="manual-form">
+        <input type="text" id="project-name" placeholder="Project Name" required>
+        <input type="date" id="entry-date" required>
+        <input type="number" id="duration-hours" placeholder="Hours" min="0">
+        <input type="number" id="duration-minutes" placeholder="Minutes" min="0" max="59">
+        <textarea id="notes" placeholder="Notes (optional)"></textarea>
+        <button type="submit" id="save-entry-btn">Save Entry</button>
+      </form>
+    </div>
+    <div id="entries">
+      <h3>Recent Entries</h3>
+      <ul id="entry-list"></ul>
+      <div id="export-buttons">
+        <button id="export-json-btn">Export JSON</button>
+        <button id="export-csv-btn">Export CSV</button>
+        <button id="clear-storage-btn">Clear Data</button>
+      </div>
+    </div>
   </div>
   <script src="popup.js"></script>
 </body>
