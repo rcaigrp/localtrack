@@ -476,3 +476,7 @@ I'm implementing the timer persistence logic in popup.js using chrome.storage.lo
     "rationale": "The manual entry form is a core feature that needs to be validated for proper data persistence and UI updates before marking as complete"
   }
 }
+
+## Turn 12 — Craft (2026-05-26 18:30 UTC)
+
+I'm implementing timer persistence functionality in popup.js using chrome.storage.local. Based on the project files and previous insights, I'll rewrite the popup.js file to properly save timer state on every tick and restore it when the popup opens, using requestAnimationFrame for better performance.
