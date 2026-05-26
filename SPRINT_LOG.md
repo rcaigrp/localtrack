@@ -432,3 +432,7 @@ Completely rewrote the popup.js file to fix the timer functionality by using a m
 ## Turn 9 — Craft (2026-05-26 18:24 UTC)
 
 I've rewritten the popup.js file to fix timer persistence issues and implement proper local storage handling for manual entries using requestAnimationFrame for smooth UI updates. The solution ensures the timer state is correctly saved and restored across popup open/close cycles, and manual entries are properly stored in Chrome's local storage.
+
+## Turn 10 — Craft (2026-05-26 18:26 UTC)
+
+I'm implementing the timer persistence logic in popup.js using chrome.storage.local for saving and restoring timer state. I've rewritten the popup.js file to properly handle state persistence across popup open/close cycles, including accurate time tracking with requestAnimationFrame and proper storage operations.

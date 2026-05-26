@@ -1,39 +1,30 @@
-let timerInterval = null;
+let timerInterval;
 let startTime = 0;
 let elapsedTime = 0;
 let isRunning = false;
 
 // DOM elements
-const timeDisplay = document.getElementById('timeDisplay');
-const startButton = document.getElementById('startButton');
-const pauseButton = document.getElementById('pauseButton');
-const stopButton = document.getElementById('stopButton');
-const resetButton = document.getElementById('resetButton');
-const addEntryButton = document.getElementById('addEntryButton');
-const projectInput = document.getElementById('projectInput');
-const descriptionInput = document.getElementById('descriptionInput');
-const entriesList = document.getElementById('entriesList');
+const timeDisplay = document.getElementById('time-display');
+const startBtn = document.getElementById('start-btn');
+const pauseBtn = document.getElementById('pause-btn');
+const stopBtn = document.getElementById('stop-btn');
+const resetBtn = document.getElementById('reset-btn');
+const saveEntryBtn = document.getElementById('save-entry-btn');
+const projectInput = document.getElementById('project-input');
+const entriesList = document.getElementById('entries-list');
 
 // Format time as HH:MM:SS
 function formatTime(ms) {
-  let seconds = Math.floor(ms / 1000);
-  let minutes = Math.floor(seconds / 60);
-  let hours = Math.floor(minutes / 60);
-  
-  seconds = seconds % 60;
-  minutes = minutes % 60;
-  
+  const hours = Math.floor(ms / 3600000);
+  const minutes = Math.floor((ms % 3600000) / 60000);
+  const seconds = Math.floor((ms % 60000) / 1000);
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
-// Update UI with current time
+// Update display with current time
 function updateDisplay() {
-  if (isRunning) {
-    const currentTime = Date.now();
-    elapsedTime = currentTime - startTime;
-  }
-  
-  timeDisplay.textContent = formatTime(elapsedTime);
+  const currentTime = isRunning ? Date.now() - startTime : elapsedTime;
+  timeDisplay.textContent = formatTime(currentTime);
 }
 
 // Save timer state to storage
@@ -43,51 +34,48 @@ function saveTimerState() {
     startTime,
     elapsedTime
   };
-  
-  chrome.storage.local.set({timerState: state}, function() {
-    if (chrome.runtime.lastError) {
-      console.error('Storage error:', chrome.runtime.lastError);
-    }
-  });
+  chrome.storage.local.set({timerState: state});
 }
 
 // Load timer state from storage
 function loadTimerState() {
-  chrome.storage.local.get(['timerState'], function(result) {
-    if (result.timerState) {
-      const {isRunning: running, startTime: start, elapsedTime: elapsed} = result.timerState;
-      isRunning = running;
-      startTime = start;
-      elapsedTime = elapsed;
-      
-      if (isRunning) {
-        // Restart the timer
-        startTimer();
-      } else {
-        updateDisplay();
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['timerState'], (result) => {
+      if (result.timerState) {
+        const {isRunning, startTime, elapsedTime} = result.timerState;
+        if (isRunning) {
+          // If timer was running, calculate new start time
+          const now = Date.now();
+          const newStartTime = now - elapsedTime;
+          this.startTime = newStartTime;
+          this.isRunning = true;
+          startTimer();
+        } else {
+          this.isRunning = false;
+          this.elapsedTime = elapsedTime;
+          updateDisplay();
+        }
       }
-    } else {
-      updateDisplay();
-    }
+      resolve();
+    });
   });
 }
 
 // Start the timer
 function startTimer() {
   if (!isRunning) {
-    isRunning = true;
     startTime = Date.now() - elapsedTime;
+    isRunning = true;
     
-    // Use requestAnimationFrame for smoother updates
-    function update() {
+    function tick() {
       if (isRunning) {
         updateDisplay();
-        requestAnimationFrame(update);
+        saveTimerState(); // Save state on every tick
+        timerInterval = requestAnimationFrame(tick);
       }
     }
     
-    update();
-    saveTimerState();
+    timerInterval = requestAnimationFrame(tick);
   }
 }
 
@@ -95,6 +83,7 @@ function startTimer() {
 function pauseTimer() {
   if (isRunning) {
     isRunning = false;
+    cancelAnimationFrame(timerInterval);
     saveTimerState();
   }
 }
@@ -102,6 +91,7 @@ function pauseTimer() {
 // Stop the timer
 function stopTimer() {
   isRunning = false;
+  cancelAnimationFrame(timerInterval);
   elapsedTime = 0;
   updateDisplay();
   saveTimerState();
@@ -110,87 +100,85 @@ function stopTimer() {
 // Reset the timer
 function resetTimer() {
   isRunning = false;
+  cancelAnimationFrame(timerInterval);
   elapsedTime = 0;
   updateDisplay();
   saveTimerState();
 }
 
-// Add a manual entry
-function addManualEntry() {
+// Save manual entry to storage
+function saveManualEntry() {
   const project = projectInput.value.trim();
-  const description = descriptionInput.value.trim();
-  
   if (project) {
     const entry = {
       id: Date.now(),
       project,
-      description,
-      time: elapsedTime,
-      timestamp: new Date().toISOString()
+      time: elapsedTime
     };
     
-    // Load existing entries
-    chrome.storage.local.get(['entries'], function(result) {
-      let entries = result.entries || [];
+    chrome.storage.local.get(['entries'], (result) => {
+      const entries = result.entries || [];
       entries.push(entry);
-      
-      // Save back to storage
-      chrome.storage.local.set({entries}, function() {
-        if (chrome.runtime.lastError) {
-          console.error('Storage error:', chrome.runtime.lastError);
-        }
-        
-        // Clear inputs
+      chrome.storage.local.set({entries}, () => {
+        // Update UI immediately
+        renderEntries();
         projectInput.value = '';
-        descriptionInput.value = '';
-        
-        // Update UI
-        loadEntries();
       });
     });
   }
 }
 
-// Load manual entries from storage
-function loadEntries() {
-  chrome.storage.local.get(['entries'], function(result) {
+// Load and render manual entries
+function renderEntries() {
+  chrome.storage.local.get(['entries'], (result) => {
     const entries = result.entries || [];
-    
-    // Clear existing list
     entriesList.innerHTML = '';
-    
-    // Add each entry to the list
     entries.forEach(entry => {
       const entryElement = document.createElement('div');
       entryElement.className = 'entry-item';
-      entryElement.innerHTML = `
-        <strong>${entry.project}</strong> - ${formatTime(entry.time)}<br>
-        <small>${entry.description || ''}</small>
-      `;
+      entryElement.textContent = `${formatTime(entry.time)} - ${entry.project}`;
       entriesList.appendChild(entryElement);
     });
   });
 }
 
-// Initialize the popup
-function initPopup() {
-  // Load saved state
-  loadTimerState();
-  
-  // Load entries
-  loadEntries();
-  
-  // Set up event listeners
-  startButton.addEventListener('click', startTimer);
-  pauseButton.addEventListener('click', pauseTimer);
-  stopButton.addEventListener('click', stopTimer);
-  resetButton.addEventListener('click', resetTimer);
-  addEntryButton.addEventListener('click', addManualEntry);
+// Export data
+function exportData() {
+  chrome.storage.local.get(['entries', 'timerState'], (result) => {
+    const data = {
+      entries: result.entries || [],
+      timerState: result.timerState
+    };
+    
+    // Create JSON file
+    const jsonBlob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(jsonBlob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'localtrack-export.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
 }
 
-// Initialize when DOM is loaded
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initPopup);
-} else {
-  initPopup();
+// Initialize the popup
+async function initPopup() {
+  await loadTimerState();
+  renderEntries();
+  
+  // Set up event listeners
+  startBtn.addEventListener('click', startTimer);
+  pauseBtn.addEventListener('click', pauseTimer);
+  stopBtn.addEventListener('click', stopTimer);
+  resetBtn.addEventListener('click', resetTimer);
+  saveEntryBtn.addEventListener('click', saveManualEntry);
+  
+  // Update display initially
+  updateDisplay();
 }
+
+// Initialize when popup loads
+window.addEventListener('load', initPopup);
