@@ -71,3 +71,7 @@ Finalizing LocalTrack. Budget exhausted (5/5), all 6 acceptance criteria verifie
 ## Turn 29 — Craft (2026-05-26 09:38 UTC)
 
 Implementing SwiftUI Dashboard and Settings views, and the Python networking module for Jira API integration. Writing DashboardView.swift, SettingsView.swift, and networking.py. Also creating acceptance_tests.py to validate the structure and logic of these components.
+
+## Turn 30 — Craft (2026-05-26 09:39 UTC)
+
+Implemented TimerService, DataModels (Project, TimeEntry), updated networking.py for secure Jira API requests, and added BackgroundManager for pause/resume logic. These Python files simulate the Swift logic for testing in the Python environment.
